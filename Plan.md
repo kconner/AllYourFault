@@ -133,7 +133,12 @@ Using the API provided by the [USGS Earthquake Hazards Program](http://ehp2-eart
                 - Use scrollViewDidScroll to fire immediate animation
             - Results:
                 - Map annotations don't clip to bounds. You can add subviews, and presumably sublayers, and animate them freely.
-                - With 10,000 animations in the map and in the visible rect, but with 99% of their annotation views hidden, it was still far too much overhead to do the math about which should be on the screen. So, my idea of animating by leaving all earthquakes on the screen and setting them hidden or visible won't work when you zoom all the way out.
+                - With 10,000 annotations in the map and in the visible rect, but with 99% of their annotation views hidden, it was still far too much overhead to do the math about which should be on the screen. So, my idea of animating by leaving all earthquakes on the screen and setting them hidden or visible won't work when you zoom all the way out.
+                - MKMapView.annotationsInRect() needs to have its rect padded in order to include annotations whose centers are outside its bounds.
+                - With 900 blank canvas annotations in the map and all of them visible, each with a blended subview, performance was never rock bottom but not great.
+                - Annotations in the map at all should be limited to about 100. That's bad news for long-duration animations that watch several years of progress, because MapKit can't be depended on to add annotation views in sync with interactive main thread animations.
+                - So it doesn't matter which of these methods I use if I have to rely on annotation views to do it. And that means I can't animate seismic activity simultaneously with map panning and zooming.
+                - Maybe it's suitable, though, to fetch the seismic history for a map rect, ordered descending by magnitude and limited to a performant number of annotations. Like, here's the timeline of the top 100 earthquakes in this area. And then I make annotations for each and, so long as you leave the map alone and just play with the timeline, you can animate smoothly within annotation views. That also designs away the problem of animating earthquakes that are off-screen.
     - Models
         - Model type
         - JSON mapping

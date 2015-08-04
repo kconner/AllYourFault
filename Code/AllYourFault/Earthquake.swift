@@ -11,11 +11,9 @@ import MapKit
 final class Earthquake: NSObject, MKAnnotation {
 
     let coordinate: CLLocationCoordinate2D
-    let hidden: Bool
 
-    init(coordinate: CLLocationCoordinate2D, hidden: Bool) {
+    init(coordinate: CLLocationCoordinate2D) {
         self.coordinate = coordinate
-        self.hidden = hidden
     }
    
 }
