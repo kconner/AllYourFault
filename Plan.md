@@ -138,7 +138,9 @@ Using the API provided by the [USGS Earthquake Hazards Program](http://ehp2-eart
                 - With 900 blank canvas annotations in the map and all of them visible, each with a blended subview, performance was never rock bottom but not great.
                 - Annotations in the map at all should be limited to about 100. That's bad news for long-duration animations that watch several years of progress, because MapKit can't be depended on to add annotation views in sync with interactive main thread animations.
                 - So it doesn't matter which of these methods I use if I have to rely on annotation views to do it. And that means I can't animate seismic activity simultaneously with map panning and zooming.
-                - Maybe it's suitable, though, to fetch the seismic history for a map rect, ordered descending by magnitude and limited to a performant number of annotations. Like, here's the timeline of the top 100 earthquakes in this area. And then I make annotations for each and, so long as you leave the map alone and just play with the timeline, you can animate smoothly within annotation views. That also designs away the problem of animating earthquakes that are off-screen.
+        - Conclusions
+            - Maybe it's suitable to fetch the seismic history for a map rect, ordered descending by magnitude and limited to a performant number of annotations. Like, here's the timeline of the top 100 earthquakes in this area. And then I make annotations for each and, so long as you leave the map alone and just play with the timeline, you can animate smoothly within annotation views. That also designs away the problem of animating earthquakes that are off-screen.
+            - OK, so I want to superimpose a scroll view that lets you scrub through the recorded event timeline, and a play button that will play through it to the end. The timeline should label years and months, and can have marks in it for seismic events with their magnitudes. I can coordinate an animation among all the annotation views, or just among a pool of layers added over the map view, and move through frames incrementally. (In fact, if I don't use the annotation views but just do map point conversion myself, I don't have to limit it to just so few events.) Animation should be able to run explicitly by a CADisplayLink or by scroll view motion. That should be a good basis to add sound and other effects. I don't think this needs prototyping.
     - Models
         - Model type
         - JSON mapping
@@ -161,5 +163,6 @@ Using the API provided by the [USGS Earthquake Hazards Program](http://ehp2-eart
         - Simultaneous map panning/zooming and time animation
         - Hard part is over; add cool stuff as needed
         - App icon
+        - Launch screen
         - Memory, performance, battery, GPS usage testing
         - Unit tests for real, time permitting
