@@ -1,4 +1,4 @@
-# WillowTree earthquake app
+# All Your Fault
 
 ## Prompt
 
@@ -113,13 +113,15 @@ Using the API provided by the [USGS Earthquake Hazards Program](http://ehp2-eart
         - Boundary Conditions
         - iCrusties
 - Implementation steps
-    x Project structure, CocoaPods if I think I'll need it
+    - Project structure, CocoaPods if I think I'll need it
     - IB storyboard (Just a map view to start)
     - View prototyping
         - SceneKit
             - Snapshot a map view, use as a SCNPlane texture
             - Animate a map point to center and a certain zoom level, then superimpose a SCNView and animate the plane upward. Want to time animations so there is no stuttering.
-            - Animate it back and then reveal the map again
+            - Results:
+                - Although the map tells me it is done moving into position and done rendering, it's not done rendering *to the screen*. When I take the snapshot image on my iPhone 6 it is still fading between the original blurry map text and the new, zoomed-in sharp map text. I would have to delay by some arbitrary amount of time before taking the image.
+                - When the scene view is shown, there is a flash before the map plane with the snapshot image shows up, during which nothing at all is rendering. I'd have to figure out how to wait until SceneKit has drawn its first frame, and I have never even tried SceneKit.
         - Map annotations
             - As particle/ripple emitters
                 - Do they clip to bounds?

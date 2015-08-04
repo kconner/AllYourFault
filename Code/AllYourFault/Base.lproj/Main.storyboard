@@ -29,28 +29,19 @@
                                     <action selector="didTapTestButton:" destination="BYZ-38-t0r" eventType="touchUpInside" id="yKo-xZ-fDY"/>
                                 </connections>
                             </button>
-                            <sceneKitView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="oMd-2g-Z9e">
-                                <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
-                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                            </sceneKitView>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                         <constraints>
-                            <constraint firstItem="oMd-2g-Z9e" firstAttribute="trailing" secondItem="Lsj-gW-u8f" secondAttribute="trailing" id="Dj2-Hn-VMQ"/>
                             <constraint firstItem="Ptd-kL-kL0" firstAttribute="top" secondItem="y3c-jy-aDJ" secondAttribute="bottom" id="GBS-4k-MVM"/>
                             <constraint firstItem="Ptd-kL-kL0" firstAttribute="trailing" secondItem="8bC-Xf-vdC" secondAttribute="trailingMargin" id="MkG-nj-5AZ"/>
-                            <constraint firstItem="oMd-2g-Z9e" firstAttribute="bottom" secondItem="Lsj-gW-u8f" secondAttribute="bottom" id="W2g-Tw-TqX"/>
                             <constraint firstItem="Lsj-gW-u8f" firstAttribute="top" secondItem="8bC-Xf-vdC" secondAttribute="top" id="cDn-zM-6w2"/>
                             <constraint firstAttribute="trailing" secondItem="Lsj-gW-u8f" secondAttribute="trailing" id="dFT-sr-IXF"/>
                             <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="Lsj-gW-u8f" secondAttribute="bottom" id="lvg-26-Fbf"/>
-                            <constraint firstItem="oMd-2g-Z9e" firstAttribute="top" secondItem="Lsj-gW-u8f" secondAttribute="top" id="nDy-dX-kjJ"/>
-                            <constraint firstItem="oMd-2g-Z9e" firstAttribute="leading" secondItem="Lsj-gW-u8f" secondAttribute="leading" id="t4x-Su-JA8"/>
                             <constraint firstItem="Lsj-gW-u8f" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" id="uOy-jm-dsX"/>
                         </constraints>
                     </view>
                     <connections>
                         <outlet property="mapView" destination="Lsj-gW-u8f" id="NKj-b1-nZD"/>
-                        <outlet property="sceneView" destination="oMd-2g-Z9e" id="687-aQ-ZdV"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
