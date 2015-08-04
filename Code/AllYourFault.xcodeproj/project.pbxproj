@@ -9,7 +9,9 @@
 /* Begin PBXBuildFile section */
 		0A2A4D581B712653007C69C6 /* Feature.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A2A4D571B712653007C69C6 /* Feature.swift */; };
 		0A2A4D5A1B7127D9007C69C6 /* features.json in Resources */ = {isa = PBXBuildFile; fileRef = 0A2A4D591B7127D9007C69C6 /* features.json */; };
-		0A2A4D5C1B71298F007C69C6 /* Map.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A2A4D5B1B71298F007C69C6 /* Map.swift */; };
+		0A2A4D5C1B71298F007C69C6 /* MapPlist.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A2A4D5B1B71298F007C69C6 /* MapPlist.swift */; };
+		0A2A4D5E1B713BCB007C69C6 /* error.json in Resources */ = {isa = PBXBuildFile; fileRef = 0A2A4D5D1B713BCB007C69C6 /* error.json */; };
+		0A2A4D601B713C3A007C69C6 /* APIError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A2A4D5F1B713C3A007C69C6 /* APIError.swift */; };
 		0AF433451B70486200957775 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AF433441B70486200957775 /* AppDelegate.swift */; };
 		0AF433471B70486200957775 /* MapViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AF433461B70486200957775 /* MapViewController.swift */; };
 		0AF4334A1B70486200957775 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 0AF433481B70486200957775 /* Main.storyboard */; };
@@ -31,7 +33,9 @@
 /* Begin PBXFileReference section */
 		0A2A4D571B712653007C69C6 /* Feature.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Feature.swift; sourceTree = "<group>"; };
 		0A2A4D591B7127D9007C69C6 /* features.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = features.json; sourceTree = "<group>"; };
-		0A2A4D5B1B71298F007C69C6 /* Map.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Map.swift; sourceTree = "<group>"; };
+		0A2A4D5B1B71298F007C69C6 /* MapPlist.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MapPlist.swift; sourceTree = "<group>"; };
+		0A2A4D5D1B713BCB007C69C6 /* error.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = error.json; sourceTree = "<group>"; };
+		0A2A4D5F1B713C3A007C69C6 /* APIError.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = APIError.swift; sourceTree = "<group>"; };
 		0AF4333F1B70486200957775 /* AllYourFault.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AllYourFault.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		0AF433431B70486200957775 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		0AF433441B70486200957775 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -66,7 +70,8 @@
 			isa = PBXGroup;
 			children = (
 				0A2A4D571B712653007C69C6 /* Feature.swift */,
-				0A2A4D5B1B71298F007C69C6 /* Map.swift */,
+				0A2A4D5F1B713C3A007C69C6 /* APIError.swift */,
+				0A2A4D5B1B71298F007C69C6 /* MapPlist.swift */,
 			);
 			name = Models;
 			sourceTree = "<group>";
@@ -87,6 +92,7 @@
 				0AF4334B1B70486200957775 /* Images.xcassets */,
 				0AF4334D1B70486200957775 /* LaunchScreen.xib */,
 				0A2A4D591B7127D9007C69C6 /* features.json */,
+				0A2A4D5D1B713BCB007C69C6 /* error.json */,
 				0AF433421B70486200957775 /* Supporting Files */,
 			);
 			name = Application;
@@ -225,6 +231,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0A2A4D5E1B713BCB007C69C6 /* error.json in Resources */,
 				0A2A4D5A1B7127D9007C69C6 /* features.json in Resources */,
 				0AF4334A1B70486200957775 /* Main.storyboard in Resources */,
 				0AF4334F1B70486200957775 /* LaunchScreen.xib in Resources */,
@@ -246,9 +253,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				0A2A4D5C1B71298F007C69C6 /* Map.swift in Sources */,
+				0A2A4D5C1B71298F007C69C6 /* MapPlist.swift in Sources */,
 				0A2A4D581B712653007C69C6 /* Feature.swift in Sources */,
 				0AF433471B70486200957775 /* MapViewController.swift in Sources */,
+				0A2A4D601B713C3A007C69C6 /* APIError.swift in Sources */,
 				0AF433451B70486200957775 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

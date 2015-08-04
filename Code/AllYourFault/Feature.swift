@@ -12,11 +12,11 @@ import MapKit
 
 struct Feature {
 
-    let identifier: String // property.code
-    let time: NSDate // property.time
+    let identifier: String // properties.code
+    let time: NSDate // properties.time
     let coordinate: CLLocationCoordinate2D // geometry.coordinates[0..<2]
 
-    // Expected:
+    // TODO: assert that
     // properties.type == "earthquake"
     // geometry.type == "Point"
 
