@@ -144,10 +144,9 @@ Using the API provided by the [USGS Earthquake Hazards Program](http://ehp2-eart
     - Models
         - Model type
         - JSON mapping
-        - View prototyping, again
-            - How fast does the entire data set map into memory?
-            - If we get all the data for an area, is it efficient to visit and update every visible annotation view? At what zoom levels? What is the bottleneck?
-            - When our best option for annotations is used, does a custom control over the map suck?
+        - Performance testing
+            - Mapping all 8,713 features in the total data set took 27 seconds on iPhone 6. That bites.
+            - Map.array could be a good place to parallelize, but it wouldn't make it work for every possible feature. We will want to do mapping off the main thread anyway.
         - Error type
         - NSURLSession requests
         - If we operate on entire database locally:
