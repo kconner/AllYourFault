@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		0A2A4D531B705E9D007C69C6 /* Earthquake.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A2A4D521B705E9D007C69C6 /* Earthquake.swift */; };
+		0A2A4D581B712653007C69C6 /* Feature.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A2A4D571B712653007C69C6 /* Feature.swift */; };
 		0AF433451B70486200957775 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AF433441B70486200957775 /* AppDelegate.swift */; };
 		0AF433471B70486200957775 /* MapViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AF433461B70486200957775 /* MapViewController.swift */; };
 		0AF4334A1B70486200957775 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 0AF433481B70486200957775 /* Main.storyboard */; };
@@ -27,7 +27,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		0A2A4D521B705E9D007C69C6 /* Earthquake.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Earthquake.swift; sourceTree = "<group>"; };
+		0A2A4D571B712653007C69C6 /* Feature.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Feature.swift; sourceTree = "<group>"; };
 		0AF4333F1B70486200957775 /* AllYourFault.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AllYourFault.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		0AF433431B70486200957775 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		0AF433441B70486200957775 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -61,7 +61,7 @@
 		0A2A4D541B705EA3007C69C6 /* Models */ = {
 			isa = PBXGroup;
 			children = (
-				0A2A4D521B705E9D007C69C6 /* Earthquake.swift */,
+				0A2A4D571B712653007C69C6 /* Feature.swift */,
 			);
 			name = Models;
 			sourceTree = "<group>";
@@ -239,8 +239,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0A2A4D581B712653007C69C6 /* Feature.swift in Sources */,
 				0AF433471B70486200957775 /* MapViewController.swift in Sources */,
-				0A2A4D531B705E9D007C69C6 /* Earthquake.swift in Sources */,
 				0AF433451B70486200957775 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
