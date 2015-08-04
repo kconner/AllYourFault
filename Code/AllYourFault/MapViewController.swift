@@ -9,32 +9,32 @@
 import UIKit
 import MapKit
 
+// The app's main view.
+
 final class MapViewController: UIViewController {
 
     @IBOutlet var mapView: MKMapView!
+
+    let request = APIEndpoints.dummyRequest()
 
     // MARK: UIViewController
 
     override func viewDidLoad() {
         super.viewDidLoad()
+    }
 
-        // Test JSON mapping.
-        var error: NSError?
-        if let path = NSBundle.mainBundle().pathForResource("error", ofType: "json"),
-            let data = NSData(contentsOfFile: path, options: nil, error: &error) {
+    // MARK: Helpers
 
-            let plistValue: AnyObject? = NSJSONSerialization.JSONObjectWithData(data, options: nil, error: &error)
-            assert(error == nil, "Should not have failed to parse JSON to plist objects.")
-
-            let m = MapPlist.self
-            if let dictionary = m.dictionary(plistValue),
-                let error = APIError.mapPlistValue(dictionary["metadata"]) {
-
-                // Break here and debug to verify our mapping succeeded.
-                NSLog("mapped error object")
+    // Test a request for data.
+    @IBAction func didTapTestButton(sender: AnyObject) {
+        NSLog("sending request")
+        request.send() { result -> Void in
+            switch result {
+            case .Success(let box):
+                NSLog("success: \(box.unbox.count) items")
+            case .Failure(let box):
+                NSLog("failure: \(box.unbox.title)\n\(box.unbox.message)")
             }
-        } else {
-            NSLog("Failed to open file.")
         }
     }
 
