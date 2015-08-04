@@ -1,0 +1,21 @@
+//
+//  Earthquake.swift
+//  AllYourFault
+//
+//  Created by Kevin Conner on 8/3/15.
+//  Copyright (c) 2015 Kevin Conner. All rights reserved.
+//
+
+import MapKit
+
+final class Earthquake: NSObject, MKAnnotation {
+
+    let coordinate: CLLocationCoordinate2D
+    let hidden: Bool
+
+    init(coordinate: CLLocationCoordinate2D, hidden: Bool) {
+        self.coordinate = coordinate
+        self.hidden = hidden
+    }
+   
+}

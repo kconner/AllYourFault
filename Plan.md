@@ -131,7 +131,9 @@ Using the API provided by the [USGS Earthquake Hazards Program](http://ehp2-eart
             - Animations on map annotations
                 - Manipulate transformations and alphas of subviews or layers as timestamp changes
                 - Use scrollViewDidScroll to fire immediate animation
-            - Does bar translucency have any effect on drawing?
+            - Results:
+                - Map annotations don't clip to bounds. You can add subviews, and presumably sublayers, and animate them freely.
+                - With 10,000 animations in the map and in the visible rect, but with 99% of their annotation views hidden, it was still far too much overhead to do the math about which should be on the screen. So, my idea of animating by leaving all earthquakes on the screen and setting them hidden or visible won't work when you zoom all the way out.
     - Models
         - Model type
         - JSON mapping

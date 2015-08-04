@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0A2A4D531B705E9D007C69C6 /* Earthquake.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A2A4D521B705E9D007C69C6 /* Earthquake.swift */; };
 		0AF433451B70486200957775 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AF433441B70486200957775 /* AppDelegate.swift */; };
 		0AF433471B70486200957775 /* MapViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AF433461B70486200957775 /* MapViewController.swift */; };
 		0AF4334A1B70486200957775 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 0AF433481B70486200957775 /* Main.storyboard */; };
@@ -26,6 +27,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		0A2A4D521B705E9D007C69C6 /* Earthquake.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Earthquake.swift; sourceTree = "<group>"; };
 		0AF4333F1B70486200957775 /* AllYourFault.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AllYourFault.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		0AF433431B70486200957775 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		0AF433441B70486200957775 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -56,6 +58,34 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		0A2A4D541B705EA3007C69C6 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				0A2A4D521B705E9D007C69C6 /* Earthquake.swift */,
+			);
+			name = Models;
+			sourceTree = "<group>";
+		};
+		0A2A4D551B705EA7007C69C6 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				0AF433461B70486200957775 /* MapViewController.swift */,
+			);
+			name = Views;
+			sourceTree = "<group>";
+		};
+		0A2A4D561B705EB9007C69C6 /* Application */ = {
+			isa = PBXGroup;
+			children = (
+				0AF433441B70486200957775 /* AppDelegate.swift */,
+				0AF433481B70486200957775 /* Main.storyboard */,
+				0AF4334B1B70486200957775 /* Images.xcassets */,
+				0AF4334D1B70486200957775 /* LaunchScreen.xib */,
+				0AF433421B70486200957775 /* Supporting Files */,
+			);
+			name = Application;
+			sourceTree = "<group>";
+		};
 		0AF433361B70486200957775 = {
 			isa = PBXGroup;
 			children = (
@@ -77,12 +107,9 @@
 		0AF433411B70486200957775 /* AllYourFault */ = {
 			isa = PBXGroup;
 			children = (
-				0AF433441B70486200957775 /* AppDelegate.swift */,
-				0AF433461B70486200957775 /* MapViewController.swift */,
-				0AF433481B70486200957775 /* Main.storyboard */,
-				0AF4334B1B70486200957775 /* Images.xcassets */,
-				0AF4334D1B70486200957775 /* LaunchScreen.xib */,
-				0AF433421B70486200957775 /* Supporting Files */,
+				0A2A4D561B705EB9007C69C6 /* Application */,
+				0A2A4D541B705EA3007C69C6 /* Models */,
+				0A2A4D551B705EA7007C69C6 /* Views */,
 			);
 			path = AllYourFault;
 			sourceTree = "<group>";
@@ -213,6 +240,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				0AF433471B70486200957775 /* MapViewController.swift in Sources */,
+				0A2A4D531B705E9D007C69C6 /* Earthquake.swift in Sources */,
 				0AF433451B70486200957775 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
