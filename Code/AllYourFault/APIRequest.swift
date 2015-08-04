@@ -43,15 +43,26 @@ struct APIRequest<T> {
 
         // Mock the above.
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, Int64(1.0 * Double(NSEC_PER_SEC))), dispatch_get_main_queue()) {
-            self.mockResponse(completion)
+
+            // Do result preparation, including object mapping, in the background.
+            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)) {
+                let result = self.result()
+
+                // Return on the main thread.
+                dispatch_async(dispatch_get_main_queue()) {
+                    completion(result)
+                }
+            }
         }
     }
 
     // MARK: Helpers
 
-    private func mockResponse(completion: ResultType -> Void) {
+    // TODO: Should take the response as an argument.
+    private func result() -> ResultType {
         var error: NSError?
-        
+
+        // Mock the status and response data.
         let status: Int
         var responseData: NSData?
         switch arc4random_uniform(3) {
@@ -72,47 +83,53 @@ struct APIRequest<T> {
         default:
             status = 500
         }
-        
+
+        // Parse response body as JSON to plist objects.
         let plistValue: AnyObject?
         // TODO: responseData should not be nil when it comes from the web service
         if let data = responseData {
             plistValue = NSJSONSerialization.JSONObjectWithData(data, options: nil, error: &error)
             
             if let error = error {
-                completion(invalidDataResultWithStatus(status))
+                return invalidDataResultWithStatus(status)
             }
         } else {
             plistValue = nil
         }
-        
+
+        // Produce result value, usually by mapping plist objects to native objects.
         switch status {
         case 200..<300:
             if let dictionary = MapPlist.dictionary(plistValue),
                 let successValue = mapSuccessValue(dictionary[successKey]) {
                     
-                completion(APIResult.success(successValue))
+                return APIResult.success(successValue)
             } else {
-                completion(invalidDataResultWithStatus(status))
+                return invalidDataResultWithStatus(status)
             }
         case 400..<500:
             if let dictionary = MapPlist.dictionary(plistValue),
                 let failureValue = mapFailureValue(dictionary[failureKey]) {
                     
-                completion(APIResult.failure(failureValue))
+                return APIResult.failure(failureValue)
             } else {
-                completion(unknownErrorResultWithStatus(status))
+                return unknownErrorResultWithStatus(status)
             }
         default:
-            completion(unknownErrorResultWithStatus(status))
+            return unknownErrorResultWithStatus(status)
         }
     }
 
     private func invalidDataResultWithStatus(status: Int) -> ResultType {
-        return APIResult.failure(APIError(status: status, title: "Invalid data", message: "We couldn't understand the data returned from the web service."))
+        return APIResult.failure(APIError(status: status,
+            title: "Invalid data",
+            message: "We couldn't understand the data returned from the web service."))
     }
     
     private func unknownErrorResultWithStatus(status: Int) -> ResultType {
-        return APIResult.failure(APIError(status: status, title: "Unknown error", message: "Sorry, something went wrong."))
+        return APIResult.failure(APIError(status: status,
+            title: "Unknown error",
+            message: "Sorry, something went wrong."))
     }
 
 }
