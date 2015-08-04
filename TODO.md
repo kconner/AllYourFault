@@ -1,0 +1,156 @@
+# WillowTree earthquake app
+
+## Prompt
+
+Using the API provided by the [USGS Earthquake Hazards Program](http://ehp2-earthquake.wr.usgs.gov/fdsnws/event/1/), create an app that presents a map view to the user with recent earthquake events called out. Details and history would be cool too. You will be judged on beauty, poise and personality. In all seriousness - show us your creativity and your ability to produce top-notch professional software and not just the ability to get it to work.
+
+## Research
+
+### What's in the data?
+
+- Always want to pass "format=geojson" and "jsonerror=true"
+- Can limit queries from 1 to 20,000 quake recordings. 20,000 is the maximum.
+- But, you can also offset. 1 is the default, so start at 20,001 to get the next page.
+- And you can order by time ascending or descending, magnitude ascending or descending.
+- There's also a count endpoint you can call first in order to decide how many requests to make.
+    - This also sounds useful for calibrating the amount of data to seek for a given view.
+    - So, maybe explore fetching by descending magnitude across all time as appropriate to zoom level, and as you zoom in, pull more magnitudes.
+- Actually, with no constraints, the count is 8847, so we don't need to think about paging.
+    - Fetching everything takes :10 to prepare and then :04-1:20 to transfer. Total data was 6660kb.
+- Probably pass "eventtype=earthquake"; other seismic activity would be other "eventtype" values. By default it does not filter.
+    - Fetching with eventtype=earthquake only shaved off 100k out of 6.6mb. It didn't seem to make the response slower, besides by producing more cache misses.
+- Data is time-limited, can specify start and end times for boundaries.
+- Data updated since some time can be fetched, which means we could bake data and fetch only what's updated.
+- Data can be constrained with a lat-long box. if it crosses the IDL the horizontal should exceed 180 or -180 rather than flipping inside-out.
+- Data can instead be constrained with a center and min/max radius (by spherical degrees or surface kilometers). this means a circle, ring, or everything but a circle.
+- Constraining with both patterns will get the intersection, which doesn't sound useful.
+- Data can be constrained with min/max depth or magnitude. A wide depth range seems always interesting, but maybe limit magnitude by zoom level or time scale?
+- A quake is normally given by its "preferred origin", a seismic recording center, which I think is called a "contributor" in this API. We can get all recordings for a quake, but users probably just care about the preferred one which is the default.
+- You can fetch data for a particular recording ("event ID") but I think we're more interested in showing many recordings together.
+- Cases
+    - 200: success with data
+    - 204: success with no data to return
+    - Errors: 4xx, 5xx
+
+### Error format
+
+    {
+      "type": "FeatureCollection",
+      "metadata": {
+        "status": 400,
+        "generated": 1438628057000,
+        "url": "http://ehp2-earthquake.wr.usgs.gov/fdsnws/event/1/count?format=geojson&starttime=garbagevalue&jsonerror=true",
+        "title": "Search Error",
+        "api": "1.0.13",
+        "count": 0,
+        "error": "Bad starttime value \"garbagevalue\". Valid values are ISO-8601 timestamps."
+      },
+      "features": []
+    }
+
+### Constants from application.json
+
+    {
+      "catalogs": [
+        "ak", "at", "ci", "gcmt", "hv", "is", "ismpkansas", "ld", "mb", "nc", "nm", "nn", "pr", "pt", "se", "us", "uu", "uw"
+      ],
+      "contributors": [
+        "ak", "at", "ci", "hv", "ismp", "ld", "mb", "nc", "nm", "nn", "pr", "pt", "se", "us", "uu", "uw"
+      ],
+      "producttypes": [
+        "associate", "cap", "disassociate", "dyfi", "focal-mechanism", "general-link", "general-text", "geoserve", "impact-link", "impact-text", "losspager", "moment-tensor", "nearby-cities", "origin", "phase-data", "scitech-link", "shakemap", "tectonic-summary"
+      ],
+      "eventtypes": [
+        "acoustic noise", "acoustic_noise", "anthropogenic_event", "chemical explosion", "chemical_explosion", "earthquake", "explosion", "landslide", "mining explosion", "mining_explosion", "not_reported", "other_event", "quarry", "quarry blast", "quarry_blast", "rock_burst", "sonicboom", "sonic_boom"
+      ],
+      "magnitudetypes": [
+        "4", "H", "m", "Mb", "MbLg", "mb_Lg", "mc", "Md", "Me", "mh", "Mi", "Ml", "mlg", "Ms", "ms_20", "Mt", "Mw", "Mwb", "Mwc", "Mwp", "Mwr", "Mww", "Unknown"
+      ]
+    }
+
+## Design
+
+- Ideas
+    - Turn back the clock with a springy dial control, animate using annotation views
+        - Expanding-and-fading ripples from epicenters, scaled by magnitude or somesuch?
+    - Earthquake cartoon effects
+        - Screen-shake, disabled if "reduce motion" accessibility setting is on
+        - SpriteKit or SceneKit dust particles for big earthquakes
+        - Rumble sound effects mixed live
+    - Make heat maps of seismic activity in Core Image for each time segment, present as MKOverlay, animate
+        - Or do it live with a terrain grid and a shader? This would sacrifice 3D view…
+    - I'm not interested in a lot of filtering besides just exploring the time.
+    - If annotations are filtered by time, tap one to fire its animation
+    - Detail view for a given quake?
+    - See underneath the map. Draw concentric blended spheres up to the surface
+        - Snapshot image of map view -> SCNPlane
+        - SCNSpheres
+    - Name must be a pun
+        - earthquake theme
+            - fault
+            - seismic
+            - earth
+            - plate tectonics
+            - lithosphere
+            - crust
+            - shake
+            - ground
+            - rumble
+            - epicenter
+            - richter
+            - log scale
+            - powers of 10
+        - time theme
+            - time
+            - history
+            - clock
+            - dial
+        - Not My Fault
+        - Everyone's Fault
+        - All Your Fault (winner! hope it fits on the app icon)
+        - Dial-A-Quake
+        - Upper Crust
+        - Boundary Conditions
+        - iCrusties
+- Implementation steps
+    x Project structure, CocoaPods if I think I'll need it
+    x IB storyboard (Just a map view to start)
+    - View prototyping
+        - SceneKit
+            - Snapshot a map view, use as a SCNPlane texture
+            - Animate a map point to center and a certain zoom level, then superimpose a SCNView and animate the plane upward. Want to time animations so there is no stuttering.
+            - Animate it back and then reveal the map again
+        - Map annotations
+            - As particle/ripple emitters
+                - Do they clip to bounds?
+            - As fixed-size blank canvases
+                - How many blank / hidden canvases can we have on the screen at once?
+            - As image views that change images
+            - Animations on map annotations
+                - Manipulate transformations and alphas of subviews or layers as timestamp changes
+                - Use scrollViewDidScroll to fire immediate animation
+            - Does bar translucency have any effect on drawing?
+    - Models
+        - Model type
+        - JSON mapping
+        - View prototyping, again
+            - How fast does the entire data set map into memory?
+            - If we get all the data for an area, is it efficient to visit and update every visible annotation view? At what zoom levels? What is the bottleneck?
+            - When our best option for annotations is used, does a custom control over the map suck?
+        - Error type
+        - NSURLSession requests
+        - If we operate on entire database locally:
+            - NSKeyedArchiver to save/load models from disk
+            - Data store controller
+            - Update operations
+        - Data indexing / intermediate collections
+        - Unit tests? Well, at least write model in a testable style
+    - Views
+        - Custom dial-back-time control
+        - Play/pause control
+        - Animations within annotations
+        - Simultaneous map panning/zooming and time animation
+        - Hard part is over; add cool stuff as needed
+        - App icon
+        - Memory, performance, battery, GPS usage testing
+        - Unit tests for real, time permitting
