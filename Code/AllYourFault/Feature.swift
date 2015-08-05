@@ -20,7 +20,7 @@ struct Feature {
     // properties.type == "earthquake"
     // geometry.type == "Point"
 
-    static func mapPlistValue(value: AnyObject?) -> Feature? {
+    static func mapPlistValue(value: PlistValue) -> Feature? {
         let m = MapPlist.self
         if let dictionary = m.dictionary(value),
             let properties = m.dictionary(dictionary["properties"]),

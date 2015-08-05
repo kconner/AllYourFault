@@ -8,7 +8,7 @@
 
 import Foundation
 
-// A request that can be sent to the API.
+// A request that can be sent to the web service and that maps JSON response bodies to success or failure values.
 
 struct APIRequest<T> {
 
@@ -27,15 +27,15 @@ struct APIRequest<T> {
     var failureKey: String {
         return "metadata"
     }
-    var mapFailureValue: AnyObject? -> FailureType? {
+    var mapFailureValue: PlistValue -> FailureType? {
         return APIError.mapPlistValue
     }
 
     let URL: NSURL
     let successKey: String
-    let mapSuccessValue: AnyObject? -> SuccessType?
+    let mapSuccessValue: PlistValue -> SuccessType?
 
-    init(URL: NSURL, successKey: String, mapSuccessValue: AnyObject? -> T?) {
+    init(URL: NSURL, successKey: String, mapSuccessValue: PlistValue -> T?) {
         self.URL = URL
         self.successKey = successKey
         self.mapSuccessValue = mapSuccessValue
@@ -78,7 +78,7 @@ struct APIRequest<T> {
     private func resultWithData(responseBodyData: NSData, HTTPStatusCode: Int) -> ResultType {
         // Parse response body as JSON to plist objects.
         var error: NSError?
-        let plistValue: AnyObject? = NSJSONSerialization.JSONObjectWithData(responseBodyData, options: nil, error: &error)
+        let plistValue: PlistValue = NSJSONSerialization.JSONObjectWithData(responseBodyData, options: nil, error: &error)
         if let error = error {
             return APIRequest.invalidDataResultWithStatusCode(HTTPStatusCode)
         }
@@ -111,7 +111,7 @@ struct APIRequest<T> {
         }
     }
 
-    private func applicationStatusCodeWithPlistValue(plistValue: AnyObject?, HTTPStatusCode: Int) -> Int {
+    private func applicationStatusCodeWithPlistValue(plistValue: PlistValue, HTTPStatusCode: Int) -> Int {
         // Surprise! The API sends a 200 HTTP status code, but in a failure case, its status field says 4xx.
         // We get to hack around that.
         if successStatusCodeRange ~= HTTPStatusCode {

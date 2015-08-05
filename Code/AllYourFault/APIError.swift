@@ -6,7 +6,7 @@
 //  Copyright (c) 2015 Kevin Conner. All rights reserved.
 //
 
-// A web service error object produced by a bad request.
+// A web service error object produced by some failure in the web service, the request, or the connection.
 
 struct APIError {
 
@@ -18,7 +18,7 @@ struct APIError {
     let title: String // title
     let message: String // error
 
-    static func mapPlistValue(value: AnyObject?) -> APIError? {
+    static func mapPlistValue(value: PlistValue) -> APIError? {
         let m = MapPlist.self
         if let dictionary = m.dictionary(value),
             let statusCode = m.int(dictionary["status"]),
