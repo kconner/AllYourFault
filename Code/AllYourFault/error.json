@@ -1,1 +1,0 @@
-{"type":"FeatureCollection","metadata":{"status":400,"generated":1438712872000,"url":"http://ehp2-earthquake.wr.usgs.gov/fdsnws/event/1/count?format=geojson&jsonerror=true&starttime=garbagevalue","title":"Search Error","api":"1.0.13","count":0,"error":"Bad starttime value \"garbagevalue\". Valid values are ISO-8601 timestamps."},"features":[]}
