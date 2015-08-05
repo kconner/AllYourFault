@@ -16,6 +16,14 @@ struct APIRequest<T> {
     typealias FailureType = APIError
     typealias ResultType = APIResult<SuccessType, FailureType>
 
+    // Using computed properties because structs don't yet support static stored properties:
+    var successStatusCodeRange: Range<Int> {
+        return 200..<300
+    }
+    var expectedFailureStatusCodeRange: Range<Int> {
+        return 400..<500
+    }
+
     var failureKey: String {
         return "metadata"
     }
@@ -24,110 +32,116 @@ struct APIRequest<T> {
     }
 
     let URL: NSURL
-    let parameters: [String: String]
     let successKey: String
     let mapSuccessValue: AnyObject? -> SuccessType?
 
-    init(URL: NSURL, parameters: [String: String] = [:], successKey: String, mapSuccessValue: AnyObject? -> T?) {
+    init(URL: NSURL, successKey: String, mapSuccessValue: AnyObject? -> T?) {
         self.URL = URL
-        self.parameters = parameters
         self.successKey = successKey
         self.mapSuccessValue = mapSuccessValue
     }
 
-    func send(completion: ResultType -> Void) {
-        // TODO: Use NSURLSession to get data for the URL and parameters
-        // If the response status is in 200..<300, map success with features
-        // If the response is in 400..<500, map error with metadata
-        // Otherwise produce a generic "something went wrong error.
+    func sendWithSession(session: NSURLSession, completion: ResultType -> Void) -> NSURLSessionTask {
+        let task = session.dataTaskWithRequest(NSURLRequest(URL: URL), completionHandler: { (data, response, error) -> Void in
+            // In the shared instance of NSURLSession, this closure is called on a background thread, but I want to let that
+            // worker continue quickly. So only make the branch decision here, then do the rest on the appropriate thread.
+            if let data = data,
+                let HTTPResponse = response as? NSHTTPURLResponse {
 
-        // Mock the above.
-        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, Int64(1.0 * Double(NSEC_PER_SEC))), dispatch_get_main_queue()) {
-
-            // Do result preparation, including object mapping, in the background.
-            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)) {
-                let result = self.result()
-
-                // Return on the main thread.
+                dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)) {
+                    let result = self.resultWithData(data, HTTPStatusCode: HTTPResponse.statusCode)
+                    
+                    // Return on the main thread.
+                    dispatch_async(dispatch_get_main_queue()) {
+                        completion(result)
+                    }
+                }
+            } else {
                 dispatch_async(dispatch_get_main_queue()) {
-                    completion(result)
+                    if let error = error {
+                        let message = error.localizedFailureReason ?? "Sorry, we couldn't reach the web service."
+                        completion(APIRequest.incompleteRequestResultWithMessage(message))
+                    } else {
+                        completion(APIRequest.unknownErrorResultWithStatusCode(APIError.unknownErrorStatus))
+                    }
                 }
             }
-        }
+        })
+
+        task.resume()
+
+        return task
     }
 
     // MARK: Helpers
 
-    // TODO: Should take the response as an argument.
-    private func result() -> ResultType {
-        var error: NSError?
-
-        // Mock the status and response data.
-        let status: Int
-        var responseData: NSData?
-        switch arc4random_uniform(3) {
-        case 0:
-            if let path = NSBundle.mainBundle().pathForResource("features", ofType: "json"),
-                let data = NSData(contentsOfFile: path, options: nil, error: &error) {
-                    
-                responseData = data
-            }
-            status = 200
-        case 1:
-            if let path = NSBundle.mainBundle().pathForResource("error", ofType: "json"),
-                let data = NSData(contentsOfFile: path, options: nil, error: &error) {
-                    
-                responseData = data
-            }
-            status = 400
-        default:
-            status = 500
-        }
-
+    private func resultWithData(responseBodyData: NSData, HTTPStatusCode: Int) -> ResultType {
         // Parse response body as JSON to plist objects.
-        let plistValue: AnyObject?
-        // TODO: responseData should not be nil when it comes from the web service
-        if let data = responseData {
-            plistValue = NSJSONSerialization.JSONObjectWithData(data, options: nil, error: &error)
-            
-            if let error = error {
-                return invalidDataResultWithStatus(status)
-            }
-        } else {
-            plistValue = nil
+        var error: NSError?
+        let plistValue: AnyObject? = NSJSONSerialization.JSONObjectWithData(responseBodyData, options: nil, error: &error)
+        if let error = error {
+            return APIRequest.invalidDataResultWithStatusCode(HTTPStatusCode)
         }
+
+        let statusCode = applicationStatusCodeWithPlistValue(plistValue, HTTPStatusCode: HTTPStatusCode)
 
         // Produce result value, usually by mapping plist objects to native objects.
-        switch status {
-        case 200..<300:
+        switch statusCode {
+        case successStatusCodeRange:
             if let dictionary = MapPlist.dictionary(plistValue),
                 let successValue = mapSuccessValue(dictionary[successKey]) {
                     
                 return APIResult.success(successValue)
             } else {
-                return invalidDataResultWithStatus(status)
+                // Failed to map the success response data.
+                return APIRequest.invalidDataResultWithStatusCode(statusCode)
             }
-        case 400..<500:
+        case expectedFailureStatusCodeRange:
             if let dictionary = MapPlist.dictionary(plistValue),
                 let failureValue = mapFailureValue(dictionary[failureKey]) {
-                    
+
                 return APIResult.failure(failureValue)
             } else {
-                return unknownErrorResultWithStatus(status)
+                // Failed to map the error, so we don't know what the error was.
+                return APIRequest.unknownErrorResultWithStatusCode(statusCode)
             }
         default:
-            return unknownErrorResultWithStatus(status)
+            // Unexpected failure
+            return APIRequest.unknownErrorResultWithStatusCode(statusCode)
         }
     }
 
-    private func invalidDataResultWithStatus(status: Int) -> ResultType {
-        return APIResult.failure(APIError(status: status,
+    private func applicationStatusCodeWithPlistValue(plistValue: AnyObject?, HTTPStatusCode: Int) -> Int {
+        // Surprise! The API sends a 200 HTTP status code, but in a failure case, its status field says 4xx.
+        // We get to hack around that.
+        if successStatusCodeRange ~= HTTPStatusCode {
+            if let dictionary = MapPlist.dictionary(plistValue),
+                let metadata = MapPlist.dictionary(dictionary["metadata"]),
+                let status = MapPlist.int(metadata["status"]) {
+
+                // The HTTP status code was in the 2xx range, and we were able to parse the (sigh) application status code.
+                // So, use the application status code.
+                return status
+            }
+        }
+
+        return HTTPStatusCode
+    }
+
+    private static func incompleteRequestResultWithMessage(message: String) -> ResultType {
+        return APIResult.failure(APIError(statusCode: APIError.incompleteRequestStatus,
+            title: "Connection error",
+            message: message))
+    }
+
+    private static func invalidDataResultWithStatusCode(statusCode: Int) -> ResultType {
+        return APIResult.failure(APIError(statusCode: statusCode,
             title: "Invalid data",
             message: "We couldn't understand the data returned from the web service."))
     }
     
-    private func unknownErrorResultWithStatus(status: Int) -> ResultType {
-        return APIResult.failure(APIError(status: status,
+    private static func unknownErrorResultWithStatusCode(statusCode: Int) -> ResultType {
+        return APIResult.failure(APIError(statusCode: statusCode,
             title: "Unknown error",
             message: "Sorry, something went wrong."))
     }

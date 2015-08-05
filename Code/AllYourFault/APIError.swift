@@ -10,18 +10,22 @@
 
 struct APIError {
 
-    let status: Int // status
+    // statusCode is usually an HTTP status code, but can also be:
+    static let incompleteRequestStatus = -1 // Request failed in NSURLSession as opposed to at the server.
+    static let unknownErrorStatus = -2 // Something Else Went Wrong™
+
+    let statusCode: Int // status
     let title: String // title
     let message: String // error
 
     static func mapPlistValue(value: AnyObject?) -> APIError? {
         let m = MapPlist.self
         if let dictionary = m.dictionary(value),
-            let status = m.int(dictionary["status"]),
+            let statusCode = m.int(dictionary["status"]),
             let title = m.string(dictionary["title"]),
             let message = m.string(dictionary["error"]) {
 
-            return APIError(status: status, title: title, message: message)
+            return APIError(statusCode: statusCode, title: title, message: message)
         } else {
             return nil
         }

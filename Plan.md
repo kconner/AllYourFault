@@ -148,13 +148,12 @@ Using the API provided by the [USGS Earthquake Hazards Program](http://ehp2-eart
             - Mapping all 8,713 features in the total data set took 27 seconds on iPhone 6. That bites.
             - Map.array could be a good place to parallelize, but it wouldn't make it work for every possible feature. We will want to do mapping off the main thread anyway.
         - Error type
-        - NSURLSession requests
-        - If we operate on entire database locally:
-            - NSKeyedArchiver to save/load models from disk
-            - Data store controller
-            - Update operations
-        - Data indexing / intermediate collections
-        - Unit tests? Well, at least write model in a testable style
+        - API requests
+            - APIRequest class with mock downloads
+            - NSURLSession research (no third party libraries this project)
+            - NSURLSession requests
+            - Apparently if you get a 200 from the HTTP server, that doesn't necessarily mean there wasn't a failure. The response body's .metadata.status is an application-specific status code that I needed to respect even in an HTTP success case.
+        - API Endpoint methods to create requests for particular sets of parameters as needed
     - Views
         - Custom dial-back-time control
         - Play/pause control

@@ -15,7 +15,9 @@ final class MapViewController: UIViewController {
 
     @IBOutlet var mapView: MKMapView!
 
-    let request = APIEndpoints.dummyRequest()
+    // TODO: Probably don't need reusable references to these; just illustrating architecture for a minute.
+    let request = APIEndpoints.allEarthquakesRequest()
+    let session = NSURLSession.sharedSession()
 
     // MARK: UIViewController
 
@@ -28,7 +30,7 @@ final class MapViewController: UIViewController {
     // Test a request for data.
     @IBAction func didTapTestButton(sender: AnyObject) {
         NSLog("sending request")
-        request.send() { result -> Void in
+        request.sendWithSession(session) { result -> Void in
             switch result {
             case .Success(let box):
                 NSLog("success: \(box.unbox.count) items")
