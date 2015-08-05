@@ -10,11 +10,7 @@ import UIKit
 import MapKit
 
 // The app's main view.
-
-// Influence:
-// mapView.region and lastMapRegion ->
-// dataState ->
-// mapView.annotations
+// Chain of effects: mapView.region, lastMapRegion -> dataState -> mapView.annotations
 
 final class MapViewController: UIViewController {
 
@@ -65,7 +61,7 @@ final class MapViewController: UIViewController {
 
     private var coordinateRegionForQuery: MKCoordinateRegion {
         // TODO: 100 -> distance from top of timeline view to bottom of map view
-        let unobscuredRect = UIEdgeInsetsInsetRect(mapView.bounds, UIEdgeInsetsMake(0.0, 0.0, 0.0, 100.0))
+        let unobscuredRect = UIEdgeInsetsInsetRect(mapView.bounds, UIEdgeInsetsMake(0.0, 0.0, 100.0, 0.0))
         return mapView.convertRect(unobscuredRect, toRegionFromView: mapView)
     }
 
@@ -108,11 +104,6 @@ final class MapViewController: UIViewController {
         mapView.addAnnotations(dataState.features)
     }
     
-    // Test a request for data.
-    @IBAction func didTapTestButton(sender: AnyObject) {
-        loadDataForMapRegion()
-    }
-
 }
 
 extension MapViewController: MKMapViewDelegate {
@@ -134,9 +125,26 @@ extension MapViewController: MKMapViewDelegate {
         }
     }
 
-    // TODO
-//    func mapView(mapView: MKMapView!, viewForAnnotation annotation: MKAnnotation!) -> MKAnnotationView! {
-//        <#code#>
-//    }
+    func mapView(mapView: MKMapView!, viewForAnnotation annotation: MKAnnotation!) -> MKAnnotationView! {
+        let reuseIdentifier = "FeatureAnnotation"
+
+        if let feature = annotation as? Feature {
+            let annotationView: FeatureAnnotationView
+            if let existingAnnotationView = mapView.dequeueReusableAnnotationViewWithIdentifier(reuseIdentifier) as? FeatureAnnotationView {
+                annotationView = existingAnnotationView
+            } else {
+                annotationView = FeatureAnnotationView(annotation: annotation, reuseIdentifier: reuseIdentifier)
+            }
+
+            configureFeatureAnnotationView(annotationView, withFeature: feature)
+            return annotationView
+        } else {
+            preconditionFailure("Only Features should be used for annotations.")
+        }
+    }
+
+    private func configureFeatureAnnotationView(annotationView: FeatureAnnotationView, withFeature feature: Feature) {
+        // TODO
+    }
 
 }
