@@ -10,26 +10,32 @@ import MapKit
 
 // A seismic event reported by the USGS web service.
 
-struct Feature {
+final class Feature: NSObject, MKAnnotation {
 
     let identifier: String // properties.code
-    let time: NSDate // properties.time
+    let date: NSDate // properties.time
     let coordinate: CLLocationCoordinate2D // geometry.coordinates[0..<2]
 
     // TODO: assert that
     // properties.type == "earthquake"
     // geometry.type == "Point"
 
+    init(identifier: String, date: NSDate, coordinate: CLLocationCoordinate2D) {
+        self.identifier = identifier
+        self.date = date
+        self.coordinate = coordinate
+    }
+
     static func mapPlistValue(value: PlistValue) -> Feature? {
         let m = MapPlist.self
         if let dictionary = m.dictionary(value),
             let properties = m.dictionary(dictionary["properties"]),
             let identifier = m.string(properties["code"]),
-            let time = m.dateWithUnixTime(properties["time"]),
+            let date = m.dateWithUnixTime(properties["time"]),
             let geometry = m.dictionary(dictionary["geometry"]),
             let coordinate = m.coordinate2DWithPoint(geometry["coordinates"]) {
 
-            return Feature(identifier: identifier, time: time, coordinate: coordinate)
+            return Feature(identifier: identifier, date: date, coordinate: coordinate)
         } else {
             return nil
         }

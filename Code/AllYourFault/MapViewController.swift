@@ -11,20 +11,53 @@ import MapKit
 
 // The app's main view.
 
+// Influence:
+// mapView.region and lastMapRegion ->
+// dataState ->
+// mapView.annotations
+
 final class MapViewController: UIViewController {
+
+    private enum DataState {
+        case Empty
+        case Loading(NSURLSessionTask)
+        case Populated([Feature])
+        
+        var currentUpdateTask: NSURLSessionTask? {
+            switch self {
+            case .Loading(let task):
+                return task
+            default:
+                return nil
+            }
+        }
+        
+        var features: [Feature] {
+            switch self {
+            case .Populated(let features):
+                return features
+            default:
+                return []
+            }
+        }
+    }
 
     @IBOutlet var mapView: MKMapView!
 
-    private var lastRegion: MKCoordinateRegion!
+    private var dataState = DataState.Empty {
+        didSet {
+            replaceAnnotationsWithFeatures()
+        }
+    }
 
-    private var lastUpdateTask: NSURLSessionTask?
+    private var lastMapRegion: MKCoordinateRegion!
 
     // MARK: UIViewController
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        lastRegion = mapView.region
+        lastMapRegion = mapView.region
         mapView.delegate = self
     }
 
@@ -36,9 +69,9 @@ final class MapViewController: UIViewController {
         return mapView.convertRect(unobscuredRect, toRegionFromView: mapView)
     }
 
-    private func updateData() {
+    private func loadDataForMapRegion() {
         // Allow only one update task to run at a time.
-        lastUpdateTask?.cancel()
+        dataState.currentUpdateTask?.cancel()
 
         let request = APIEndpoints.highestMagnitudeEarthquakesRequestWithCoordinateRegion(coordinateRegionForQuery, limit: 100)
         var task: NSURLSessionTask! = nil
@@ -48,26 +81,36 @@ final class MapViewController: UIViewController {
             // For now I'm using the task identifier to ensure we only use the response for the most recently sent request.
             if let strongSelf = self,
                 let task = task
-                where task.taskIdentifier == strongSelf.lastUpdateTask?.taskIdentifier {
+                where task.taskIdentifier == strongSelf.dataState.currentUpdateTask?.taskIdentifier {
 
-                strongSelf.lastUpdateTask = nil
-
-                switch result {
-                case .Success(let box):
-                    NSLog("success: \(box.unbox.count) items")
-                case .Failure(let box):
-                    NSLog("failure: \(box.unbox.title)\n\(box.unbox.message)")
-                }
+                strongSelf.enterStateForResult(result)
             }
         }
 
-        lastUpdateTask = task
+        dataState = .Loading(task)
         task.resume()
     }
 
+    private func enterStateForResult(result: APIResult<[Feature], APIError>) {
+        switch result {
+        case .Success(let features):
+            dataState = .Populated(features.unbox)
+        case .Failure(let error):
+            dataState = .Empty
+            let alertController = UIAlertController(title: error.unbox.title, message: error.unbox.message, preferredStyle: .Alert)
+            alertController.addAction(UIAlertAction(title: "Dismiss", style: .Default, handler: nil))
+            presentViewController(alertController, animated: true, completion: nil)
+        }
+    }
+
+    private func replaceAnnotationsWithFeatures() {
+        mapView.removeAnnotations(mapView.annotations)
+        mapView.addAnnotations(dataState.features)
+    }
+    
     // Test a request for data.
     @IBAction func didTapTestButton(sender: AnyObject) {
-        updateData()
+        loadDataForMapRegion()
     }
 
 }
@@ -83,10 +126,17 @@ extension MapViewController: MKMapViewDelegate {
 
     func mapView(mapView: MKMapView!, regionDidChangeAnimated animated: Bool) {
         let region = mapView.region
-        if !coordinateRegionsAreEqual(lastRegion, region) {
-            lastRegion = region
-            updateData()
+
+        // We can get duplicate calls to this method with no change. Only load new data if the region changed meaningfully.
+        if !coordinateRegionsAreEqual(lastMapRegion, region) {
+            lastMapRegion = region
+            loadDataForMapRegion()
         }
     }
+
+    // TODO
+//    func mapView(mapView: MKMapView!, viewForAnnotation annotation: MKAnnotation!) -> MKAnnotationView! {
+//        <#code#>
+//    }
 
 }

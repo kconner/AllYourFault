@@ -158,6 +158,8 @@ Using the API provided by the [USGS Earthquake Hazards Program](http://ehp2-eart
             - The best time to get new data is after the region changes, but users can easily make many requests run at once. A request for the top 100 earthquakes in a map rect takes about ten seconds. Hell, just about any request to the USGS API appears to take right about seconds plus download time. So, when a new request is started the latest is cancelled.
             - I'd like to have a mechanism to cancel this task after the response is received but before result preparation ends. Mapping 100 earthquakes to native objects usually takes 0.18s on device, and that's a wide enough window to get unwanted results. For now I'm using the task identifier to ensure we only use the response for the most recently sent request.
     - Views
+        - Load data as map region changes
+        - Annotations for loaded earthquakes
         - Custom dial-back-time control
             - Scroll view with start and end time parameters
         - Play/pause control

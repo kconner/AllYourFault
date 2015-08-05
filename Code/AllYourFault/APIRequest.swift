@@ -52,10 +52,8 @@ struct APIRequest<T> {
                 let HTTPResponse = response as? NSHTTPURLResponse {
                     
                 dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)) {
-                    NSLog("starting to prepare result")
                     let startDate = NSDate()
                     let result = self.resultWithData(data, HTTPStatusCode: HTTPResponse.statusCode)
-                    NSLog("finished preparing result, \(NSDate().timeIntervalSinceDate(startDate)) elapsed")
 
                     // Return on the main thread.
                     dispatch_async(dispatch_get_main_queue()) {
