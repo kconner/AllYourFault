@@ -154,11 +154,14 @@ Using the API provided by the [USGS Earthquake Hazards Program](http://ehp2-eart
             - NSURLSession requests
             - Apparently if you get a 200 from the HTTP server, that doesn't necessarily mean there wasn't a failure. The response body's .metadata.status is an application-specific status code that I needed to respect even in an HTTP success case.
         - API Endpoint methods to create requests for particular sets of parameters as needed
+        - Fetch data for map region
+            - The best time to get new data is after the region changes, but users can easily make many requests run at once. A request for the top 100 earthquakes in a map rect takes about ten seconds. Hell, just about any request to the USGS API appears to take right about seconds plus download time. So, when a new request is started the latest is cancelled.
+            - I'd like to have a mechanism to cancel this task after the response is received but before result preparation ends. Mapping 100 earthquakes to native objects usually takes 0.18s on device, and that's a wide enough window to get unwanted results. For now I'm using the task identifier to ensure we only use the response for the most recently sent request.
     - Views
         - Custom dial-back-time control
+            - Scroll view with start and end time parameters
         - Play/pause control
         - Animations within annotations
-        - Simultaneous map panning/zooming and time animation
         - Hard part is over; add cool stuff as needed
         - App icon
         - Launch screen

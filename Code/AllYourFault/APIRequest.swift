@@ -17,23 +17,23 @@ struct APIRequest<T> {
     typealias ResultType = APIResult<SuccessType, FailureType>
 
     // Using computed properties because structs don't yet support static stored properties:
-    var successStatusCodeRange: Range<Int> {
+    private var successStatusCodeRange: Range<Int> {
         return 200..<300
     }
-    var expectedFailureStatusCodeRange: Range<Int> {
+    private var expectedFailureStatusCodeRange: Range<Int> {
         return 400..<500
     }
 
-    var failureKey: String {
+    private var failureKey: String {
         return "metadata"
     }
-    var mapFailureValue: PlistValue -> FailureType? {
+    private var mapFailureValue: PlistValue -> FailureType? {
         return APIError.mapPlistValue
     }
 
-    let URL: NSURL
-    let successKey: String
-    let mapSuccessValue: PlistValue -> SuccessType?
+    private let URL: NSURL
+    private let successKey: String
+    private let mapSuccessValue: PlistValue -> SuccessType?
 
     init(URL: NSURL, successKey: String, mapSuccessValue: PlistValue -> T?) {
         self.URL = URL
@@ -41,34 +41,43 @@ struct APIRequest<T> {
         self.mapSuccessValue = mapSuccessValue
     }
 
-    func sendWithSession(session: NSURLSession, completion: ResultType -> Void) -> NSURLSessionTask {
-        let task = session.dataTaskWithRequest(NSURLRequest(URL: URL), completionHandler: { (data, response, error) -> Void in
+    // To perform the request, call .resume() on the NSURLSessionTask produced by this method.
+    // You may .cancel() the task to prevent the completion block from being called.
+    func taskWithSession(session: NSURLSession, completion: ResultType -> Void) -> NSURLSessionTask {
+        var task: NSURLSessionTask!
+        task = session.dataTaskWithRequest(NSURLRequest(URL: URL), completionHandler: { (data, response, error) -> Void in
             // In the shared instance of NSURLSession, this closure is called on a background thread, but I want to let that
             // worker continue quickly. So only make the branch decision here, then do the rest on the appropriate thread.
             if let data = data,
                 let HTTPResponse = response as? NSHTTPURLResponse {
-
-                dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)) {
-                    let result = self.resultWithData(data, HTTPStatusCode: HTTPResponse.statusCode)
                     
+                dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)) {
+                    NSLog("starting to prepare result")
+                    let startDate = NSDate()
+                    let result = self.resultWithData(data, HTTPStatusCode: HTTPResponse.statusCode)
+                    NSLog("finished preparing result, \(NSDate().timeIntervalSinceDate(startDate)) elapsed")
+
                     // Return on the main thread.
                     dispatch_async(dispatch_get_main_queue()) {
+                        // TODO: I'd like to have a mechanism to cancel this task after the completion block begins but before response preparation ends.
                         completion(result)
                     }
                 }
             } else {
                 dispatch_async(dispatch_get_main_queue()) {
                     if let error = error {
-                        let message = error.localizedFailureReason ?? "Sorry, we couldn't reach the web service."
-                        completion(APIRequest.incompleteRequestResultWithMessage(message))
+                        if error.domain == NSURLErrorDomain && error.code == NSURLErrorCancelled {
+                            // No-op: Don't call completion for a cancelled request.
+                        } else {
+                            let message = error.localizedDescription ?? "Sorry, we couldn't reach the web service."
+                            completion(APIRequest.incompleteRequestResultWithMessage(message))
+                        }
                     } else {
                         completion(APIRequest.unknownErrorResultWithStatusCode(APIError.unknownErrorStatus))
                     }
                 }
             }
         })
-
-        task.resume()
 
         return task
     }
