@@ -21,6 +21,7 @@ final class FeatureTimelineView: UIView, UIScrollViewDelegate {
     private static let pointsPerAnimationSecond: CGFloat = 120.0
     private static let standardHeight: CGFloat = 64.0
 
+    private let maskLayer = CAShapeLayer()
     private let collectionView = UICollectionView(frame: CGRectZero, collectionViewLayout: UICollectionViewFlowLayout())
 
     weak var featureTimelineViewDelegate: FeatureTimelineViewDelegate?
@@ -33,9 +34,16 @@ final class FeatureTimelineView: UIView, UIScrollViewDelegate {
             collectionView.contentOffset = CGPointMake(animationPointOffset + round(CGFloat(newValue) * FeatureTimelineView.pointsPerAnimationSecond), 0.0)
         }
     }
+    // TODO: Need to save and restore this value across a size class transition so we scroll to the right place.
 
     private var days: [FeatureTimelineDay] = []
-    private var animationPointOffset: CGFloat = 0.0
+
+    // The whole animation begins sometime during the first day, not at the beginning of the first day.
+    private var animationPointOffsetInFirstDay: CGFloat = 0.0
+    // A given feature should animate when its dot reaches the center line.
+    private var animationPointOffset: CGFloat {
+        return animationPointOffsetInFirstDay - bounds.midX
+    }
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -48,6 +56,8 @@ final class FeatureTimelineView: UIView, UIScrollViewDelegate {
     }
 
     private func configureView() {
+        self.layer.mask = maskLayer
+
         collectionView.frame = self.bounds
         collectionView.autoresizingMask = .FlexibleWidth | .FlexibleHeight
         // TODO: Specific colors
@@ -64,6 +74,13 @@ final class FeatureTimelineView: UIView, UIScrollViewDelegate {
         flowLayout.sectionInset = UIEdgeInsetsZero
 
         addSubview(collectionView)
+
+        let dividerView = UIView(frame: CGRectMake(self.bounds.midX, 0.0, 1.0, self.bounds.height))
+        dividerView.autoresizingMask = .FlexibleLeftMargin | .FlexibleRightMargin | .FlexibleHeight
+        // TODO: Specific colors
+        dividerView.backgroundColor = UIColor.redColor()
+        dividerView.userInteractionEnabled = false
+        addSubview(dividerView)
     }
 
     func prepareWithAnimatingFeatures(animatingFeatures: [AnimatingFeature], animationDuration: NSTimeInterval, firstDate: NSDate) {
@@ -117,7 +134,7 @@ final class FeatureTimelineView: UIView, UIScrollViewDelegate {
         saveDayWithEndIndex(animatingFeatures.count)
 
         self.days = days
-        animationPointOffset = round(CGFloat(animationTimeOffset) * FeatureTimelineView.pointsPerAnimationSecond)
+        animationPointOffsetInFirstDay = round(CGFloat(animationTimeOffset) * FeatureTimelineView.pointsPerAnimationSecond)
 
         collectionView.reloadData()
         currentAnimationTime = 0.0
@@ -127,6 +144,17 @@ final class FeatureTimelineView: UIView, UIScrollViewDelegate {
 
     override func intrinsicContentSize() -> CGSize {
         return CGSizeMake(0.0, FeatureTimelineView.standardHeight)
+    }
+
+    // MARK: CALayerDelegate
+
+    override func layoutSublayersOfLayer(layer: CALayer!) {
+        super.layoutSublayersOfLayer(layer)
+
+        if layer == self.layer {
+            maskLayer.frame = layer.bounds
+            maskLayer.path = UIBezierPath(roundedRect: maskLayer.bounds, cornerRadius: 10.0).CGPath
+        }
     }
 
 }
