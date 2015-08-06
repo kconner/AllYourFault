@@ -162,4 +162,9 @@ extension MapViewController: MKMapViewDelegate {
         // TODO
     }
 
+    func mapView(mapView: MKMapView!, didSelectAnnotationView view: MKAnnotationView!) {
+        // TODO: Seek to this annotation's point in the timeline.
+        (view as! FeatureAnnotationView).animationTime += 0.1
+    }
+
 }

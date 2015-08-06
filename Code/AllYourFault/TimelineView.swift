@@ -8,14 +8,34 @@
 
 import UIKit
 
-class TimelineView: UIView {
+// A timeline for Features that the user can scrub through.
 
-    /*
-    // Only override drawRect: if you perform custom drawing.
-    // An empty implementation adversely affects performance during animation.
-    override func drawRect(rect: CGRect) {
-        // Drawing code
+final class TimelineView: UIView {
+
+    let scrollView = UIScrollView(frame: CGRectZero)
+
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+
+        configureSubviews()
     }
-    */
+
+    required init(coder aDecoder: NSCoder) {
+        super.init(coder: aDecoder)
+
+        configureSubviews()
+    }
+
+    func prepareWithFeatures(features: [Feature]) {
+        // TODO: How will I use the data to configure this view?
+    }
+
+    // MARK: Helpers
+
+    private func configureSubviews() {
+        scrollView.frame = self.bounds
+        scrollView.autoresizingMask = .FlexibleWidth | .FlexibleHeight
+        addSubview(scrollView)
+    }
 
 }

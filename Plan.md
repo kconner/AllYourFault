@@ -163,9 +163,13 @@ Using the API provided by the [USGS Earthquake Hazards Program](http://ehp2-eart
         - Annotations for loaded earthquakes
         - Annotation appearance
         - Play/pause button and appearance
-        - Custom dial-back-time control
-            - Scroll view with start and end time parameters
         - Animations within annotation views
+            - Each annotation view needs a sublayer with a ripple image that we can scale to animate.
+            - Each annotation will have an animation start and end time within the scope of the whole timeline.
+            - When the timeline goes to a certain time, visit each annotation view and set its local animation time.
+            - If the local animation time is in bounds, adjust the ripple layer scale.
+        - Timeline view
+            - Scroll view with start and end time parameters
         - Hard part is over; add cool stuff as needed
         - App icon
         - Launch screen
