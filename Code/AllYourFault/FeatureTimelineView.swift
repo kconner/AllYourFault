@@ -18,53 +18,44 @@ protocol FeatureTimelineViewDelegate: class {
 
 final class FeatureTimelineView: UIView, UIScrollViewDelegate {
 
-    private static let pointsPerAnimationSecond: CGFloat = 60.0
+    private static let pointsPerAnimationSecond: CGFloat = 120.0
     private static let standardHeight: CGFloat = 64.0
 
-    let collectionView = UICollectionView(frame: CGRectZero, collectionViewLayout: UICollectionViewFlowLayout())
+    private let collectionView = UICollectionView(frame: CGRectZero, collectionViewLayout: UICollectionViewFlowLayout())
 
     weak var featureTimelineViewDelegate: FeatureTimelineViewDelegate?
 
     var currentAnimationTime: NSTimeInterval {
         get {
-            return NSTimeInterval(collectionView.contentOffset.x / FeatureTimelineView.pointsPerAnimationSecond)
+            return NSTimeInterval((collectionView.contentOffset.x - animationPointOffset) / FeatureTimelineView.pointsPerAnimationSecond)
         }
         set {
-            collectionView.contentOffset = CGPointMake(round(CGFloat(newValue) * FeatureTimelineView.pointsPerAnimationSecond), 0.0)
+            collectionView.contentOffset = CGPointMake(animationPointOffset + round(CGFloat(newValue) * FeatureTimelineView.pointsPerAnimationSecond), 0.0)
         }
     }
 
+    private var days: [FeatureTimelineDay] = []
+    private var animationPointOffset: CGFloat = 0.0
+
     override init(frame: CGRect) {
         super.init(frame: frame)
-
-        configureSubviews()
+        configureView()
     }
 
     required init(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
-
-        configureSubviews()
+        configureView()
     }
 
-    func prepareWithAnimatingFeatures(animationFeatures: [AnimatingFeature], animationDuration: NSTimeInterval, startDate: NSDate) {
-
-        // collectionView.contentSize = CGSizeMake(1000.0, FeatureTimelineView.standardHeight)
-    }
-
-    // MARK: UIView
-
-    override func intrinsicContentSize() -> CGSize {
-        return CGSizeMake(0.0, FeatureTimelineView.standardHeight)
-    }
-
-    // MARK: Helpers
-
-    private func configureSubviews() {
+    private func configureView() {
         collectionView.frame = self.bounds
         collectionView.autoresizingMask = .FlexibleWidth | .FlexibleHeight
+        // TODO: Specific colors
+        collectionView.backgroundColor = UIColor.whiteColor()
+        collectionView.showsHorizontalScrollIndicator = false
         collectionView.dataSource = self
         collectionView.delegate = self
-        collectionView.registerNib(UINib(nibName: "FeatureTimelineYearCell", bundle: nil), forCellWithReuseIdentifier: FeatureTimelineYearCell.reuseIdentifier)
+        collectionView.registerClass(FeatureTimelineDayCell.self, forCellWithReuseIdentifier: FeatureTimelineDayCell.reuseIdentifier)
 
         let flowLayout = collectionView.collectionViewLayout as! UICollectionViewFlowLayout
         flowLayout.scrollDirection = .Horizontal
@@ -75,29 +66,103 @@ final class FeatureTimelineView: UIView, UIScrollViewDelegate {
         addSubview(collectionView)
     }
 
+    func prepareWithAnimatingFeatures(animatingFeatures: [AnimatingFeature], animationDuration: NSTimeInterval, firstDate: NSDate) {
+        // Divide features into segments by day.
+        var days: [FeatureTimelineDay] = []
+
+        // TODO: Test with non-gregorian calendars.
+        let calendar = NSCalendar.currentCalendar()
+        let oneDayComponents = NSDateComponents()
+        oneDayComponents.day = 1
+
+        // Get parameters for the first day in the timeline.
+        var dayDateComponents = calendar.components(.CalendarUnitYear | .CalendarUnitMonth | .CalendarUnitDay, fromDate: firstDate)
+        let firstDayStartDate: NSDate! = calendar.dateFromComponents(dayDateComponents)
+        // When during the first day does the overall animation begin?
+        let animationTimeOffset = firstDate.timeIntervalSinceDate(firstDayStartDate) * FeatureMapViewModel.animationTimePerRealTime
+
+        var day = dayDateComponents.day
+        var dayStartDate = firstDayStartDate
+        var dayEndDate: NSDate! = calendar.dateByAddingComponents(oneDayComponents, toDate: dayStartDate, options: nil)
+        var dayStartIndex = 0
+        var dayAnimationStartTime = -animationTimeOffset
+
+        let saveDayWithEndIndex: Int -> Void = { dayEndIndex in
+            // Save the day's view model.
+            let dayFeatures = animatingFeatures[dayStartIndex..<dayEndIndex]
+            let dateString = String(day) // TODO: Use a date formatter instead
+            let animationDuration = dayEndDate.timeIntervalSinceDate(dayStartDate) * FeatureMapViewModel.animationTimePerRealTime
+            days.append(FeatureTimelineDay(animatingFeatures: dayFeatures,
+                dateString: dateString,
+                animationStartTime: dayAnimationStartTime,
+                animationDuration: animationDuration))
+
+            // Advance parameters to the next day.
+            ++day
+            dayStartDate = dayEndDate
+            dayEndDate = calendar.dateByAddingComponents(oneDayComponents, toDate: dayStartDate, options: nil)
+            dayStartIndex = dayEndIndex
+            dayAnimationStartTime += animationDuration
+        }
+
+        // Features are ordered by date, and we are configured for the first day.
+        // Find the end index for each day by walking through all the features.
+        for (index, animatingFeature) in enumerate(animatingFeatures) {
+            while animatingFeature.feature.date.compare(dayEndDate) != .OrderedAscending {
+                saveDayWithEndIndex(index)
+            }
+        }
+
+        // Save the last day too.
+        saveDayWithEndIndex(animatingFeatures.count)
+
+        self.days = days
+        animationPointOffset = round(CGFloat(animationTimeOffset) * FeatureTimelineView.pointsPerAnimationSecond)
+
+        collectionView.reloadData()
+        currentAnimationTime = 0.0
+    }
+
+    // MARK: UIView
+
+    override func intrinsicContentSize() -> CGSize {
+        return CGSizeMake(0.0, FeatureTimelineView.standardHeight)
+    }
+
 }
 
 extension FeatureTimelineView: UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
 
+    private func dayAtIndexPath(indexPath: NSIndexPath) -> FeatureTimelineDay? {
+        if indices(days) ~= indexPath.row {
+            return days[indexPath.row]
+        } else {
+            return nil
+        }
+    }
+
     func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        // TODO: Based on the animation date ranges, decide the year range.
-        return 100
+        return days.count
     }
 
     func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCellWithReuseIdentifier(FeatureTimelineYearCell.reuseIdentifier, forIndexPath: indexPath) as! UICollectionViewCell
+        let cell = collectionView.dequeueReusableCellWithReuseIdentifier(FeatureTimelineDayCell.reuseIdentifier, forIndexPath: indexPath) as! UICollectionViewCell
 
-        if let yearCell = cell as? FeatureTimelineYearCell {
-            // TODO: Configure with segment, not arbitrarily
-            yearCell.year = indexPath.row + 1933
+        if let dayCell = cell as? FeatureTimelineDayCell,
+            let day = dayAtIndexPath(indexPath) {
+            dayCell.featureTimelineDay = day
         }
 
         return cell
     }
 
     func collectionView(collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAtIndexPath indexPath: NSIndexPath) -> CGSize {
-        // TODO: Width per segment should depend on the actual duration of that year.
-        return CGSizeMake(FeatureTimelineView.pointsPerAnimationSecond, FeatureTimelineView.standardHeight)
+        if let day = dayAtIndexPath(indexPath) {
+            return CGSizeMake(round(CGFloat(day.animationDuration) * FeatureTimelineView.pointsPerAnimationSecond),
+                FeatureTimelineView.standardHeight)
+        } else {
+            return CGSizeZero
+        }
     }
 
 }

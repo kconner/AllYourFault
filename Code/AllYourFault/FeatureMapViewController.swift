@@ -155,7 +155,7 @@ extension FeatureMapViewController {
             playPauseButton.enabled = false
         case .Populated(let viewModel):
             // TODO: Set up the timeline view
-            timelineView.prepareWithAnimatingFeatures(viewModel.animatingFeatures, animationDuration: viewModel.animationDuration, startDate: viewModel.firstDate)
+            timelineView.prepareWithAnimatingFeatures(viewModel.animatingFeatures, animationDuration: viewModel.animationDuration, firstDate: viewModel.firstDate)
             playPauseButton.enabled = true
         }
 

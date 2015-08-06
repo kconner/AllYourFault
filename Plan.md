@@ -171,6 +171,8 @@ Using the API provided by the [USGS Earthquake Hazards Program](http://ehp2-eart
         - Animate by display link
         - Timeline view
             - Scroll view with start and end time parameters
+            - Collection view with cells per year
+            - Dots on cells for features in that year
         - Loading state and empty state
         - Hard part is over; add cool stuff as needed
         - Keep annotations visible and animation playing while new data loads

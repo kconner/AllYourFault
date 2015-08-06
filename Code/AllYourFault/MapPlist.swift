@@ -31,8 +31,8 @@ final class MapPlist {
 
     // Expects a double representing a Unix Epoch date.
     class func dateWithUnixTime(value: PlistValue) -> NSDate? {
-        if let seconds = MapPlist.double(value) {
-            return NSDate(timeIntervalSince1970: NSTimeInterval(seconds))
+        if let milliseconds = MapPlist.double(value) {
+            return NSDate(timeIntervalSince1970: NSTimeInterval(milliseconds) / 1000.0)
         } else {
             return nil
         }

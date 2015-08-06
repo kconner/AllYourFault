@@ -18,8 +18,8 @@
 		0A7AEC8D1B72E82B00220389 /* FeatureTimelineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A7AEC8C1B72E82B00220389 /* FeatureTimelineView.swift */; };
 		0ACBAC7D1B72FC4800534830 /* FeatureMapViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0ACBAC7C1B72FC4800534830 /* FeatureMapViewModel.swift */; };
 		0ACBAC7F1B73E59D00534830 /* AnimatingFeature.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0ACBAC7E1B73E59D00534830 /* AnimatingFeature.swift */; };
-		0ACBAC841B73EE5100534830 /* FeatureTimelineYearCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0ACBAC821B73EE5100534830 /* FeatureTimelineYearCell.swift */; };
-		0ACBAC851B73EE5100534830 /* FeatureTimelineYearCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 0ACBAC831B73EE5100534830 /* FeatureTimelineYearCell.xib */; };
+		0ACBAC841B73EE5100534830 /* FeatureTimelineDayCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0ACBAC821B73EE5100534830 /* FeatureTimelineDayCell.swift */; };
+		0ACBAC871B74013D00534830 /* FeatureTimelineDay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0ACBAC861B74013D00534830 /* FeatureTimelineDay.swift */; };
 		0AF433451B70486200957775 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AF433441B70486200957775 /* AppDelegate.swift */; };
 		0AF433471B70486200957775 /* FeatureMapViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AF433461B70486200957775 /* FeatureMapViewController.swift */; };
 		0AF4334A1B70486200957775 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 0AF433481B70486200957775 /* Main.storyboard */; };
@@ -50,8 +50,8 @@
 		0A7AEC8C1B72E82B00220389 /* FeatureTimelineView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FeatureTimelineView.swift; sourceTree = "<group>"; };
 		0ACBAC7C1B72FC4800534830 /* FeatureMapViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FeatureMapViewModel.swift; sourceTree = "<group>"; };
 		0ACBAC7E1B73E59D00534830 /* AnimatingFeature.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AnimatingFeature.swift; sourceTree = "<group>"; };
-		0ACBAC821B73EE5100534830 /* FeatureTimelineYearCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FeatureTimelineYearCell.swift; sourceTree = "<group>"; };
-		0ACBAC831B73EE5100534830 /* FeatureTimelineYearCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = FeatureTimelineYearCell.xib; sourceTree = "<group>"; };
+		0ACBAC821B73EE5100534830 /* FeatureTimelineDayCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FeatureTimelineDayCell.swift; sourceTree = "<group>"; };
+		0ACBAC861B74013D00534830 /* FeatureTimelineDay.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FeatureTimelineDay.swift; sourceTree = "<group>"; };
 		0AF4333F1B70486200957775 /* AllYourFault.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AllYourFault.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		0AF433431B70486200957775 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		0AF433441B70486200957775 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -130,6 +130,7 @@
 			children = (
 				0ACBAC7C1B72FC4800534830 /* FeatureMapViewModel.swift */,
 				0ACBAC7E1B73E59D00534830 /* AnimatingFeature.swift */,
+				0ACBAC861B74013D00534830 /* FeatureTimelineDay.swift */,
 			);
 			name = "View model";
 			sourceTree = "<group>";
@@ -139,8 +140,7 @@
 			children = (
 				0A7AEC8A1B72C6E600220389 /* FeatureAnnotationView.swift */,
 				0A7AEC8C1B72E82B00220389 /* FeatureTimelineView.swift */,
-				0ACBAC821B73EE5100534830 /* FeatureTimelineYearCell.swift */,
-				0ACBAC831B73EE5100534830 /* FeatureTimelineYearCell.xib */,
+				0ACBAC821B73EE5100534830 /* FeatureTimelineDayCell.swift */,
 			);
 			name = Views;
 			sourceTree = "<group>";
@@ -279,7 +279,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				0ACBAC851B73EE5100534830 /* FeatureTimelineYearCell.xib in Resources */,
 				0AF4334A1B70486200957775 /* Main.storyboard in Resources */,
 				0AF4334F1B70486200957775 /* LaunchScreen.xib in Resources */,
 				0AF4334C1B70486200957775 /* Images.xcassets in Resources */,
@@ -304,11 +303,12 @@
 				0A2A4D641B71437D007C69C6 /* APIResult.swift in Sources */,
 				0A2A4D5C1B71298F007C69C6 /* MapPlist.swift in Sources */,
 				0ACBAC7F1B73E59D00534830 /* AnimatingFeature.swift in Sources */,
+				0ACBAC871B74013D00534830 /* FeatureTimelineDay.swift in Sources */,
 				0A7AEC8B1B72C6E600220389 /* FeatureAnnotationView.swift in Sources */,
 				0A2A4D581B712653007C69C6 /* Feature.swift in Sources */,
 				0A2A4D681B714DBD007C69C6 /* APIEndpoints.swift in Sources */,
 				0A7AEC8D1B72E82B00220389 /* FeatureTimelineView.swift in Sources */,
-				0ACBAC841B73EE5100534830 /* FeatureTimelineYearCell.swift in Sources */,
+				0ACBAC841B73EE5100534830 /* FeatureTimelineDayCell.swift in Sources */,
 				0AF433471B70486200957775 /* FeatureMapViewController.swift in Sources */,
 				0A2A4D601B713C3A007C69C6 /* APIError.swift in Sources */,
 				0A2A4D661B7143F4007C69C6 /* Box.swift in Sources */,

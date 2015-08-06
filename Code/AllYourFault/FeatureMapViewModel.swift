@@ -13,8 +13,8 @@ import Foundation
 
 struct FeatureMapViewModel {
 
-    // Animate 365 days of history per second.
-    static let animationTimePerRealTime: NSTimeInterval = 1.0 / (60 * 60 * 24 * 365)
+    // Animate one day of history per second.
+    static let animationTimePerRealTime: NSTimeInterval = 1.0 / (60 * 60 * 24)
 
     // Longest possible duration of a feature's ripple animation.
     static let featureAnimationDurationMax: NSTimeInterval = 2.0
