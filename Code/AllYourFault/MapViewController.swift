@@ -17,7 +17,7 @@ final class MapViewController: UIViewController {
     private enum DataState {
         case Empty
         case Loading(NSURLSessionTask)
-        case Populated([Feature])
+        case Populated(MapViewModel)
         
         var currentUpdateTask: NSURLSessionTask? {
             switch self {
@@ -28,12 +28,12 @@ final class MapViewController: UIViewController {
             }
         }
         
-        var features: [Feature] {
+        var viewModel: MapViewModel? {
             switch self {
-            case .Populated(let features):
-                return features
+            case .Populated(let viewModel):
+                return viewModel
             default:
-                return []
+                return nil
             }
         }
     }
@@ -52,7 +52,7 @@ final class MapViewController: UIViewController {
     private var animationTime: NSTimeInterval = 0.0 {
         didSet {
             if animationTime != oldValue {
-                moveAnimationToTime(animationTime, fromTime: oldValue)
+                moveAnimationToTime(animationTime)
             }
         }
     }
@@ -109,19 +109,31 @@ final class MapViewController: UIViewController {
     private func enterStateForResult(result: APIResult<[Feature], APIError>) {
         switch result {
         case .Success(let features):
-            dataState = .Populated(features.unbox)
+            if 0 < features.unbox.count {
+                let viewModel = MapViewModel(features: features.unbox)
+                dataState = .Populated(viewModel)
+            } else {
+                dataState = .Empty
+            }
         case .Failure(let error):
             dataState = .Empty
-            let alertController = UIAlertController(title: error.unbox.title, message: error.unbox.message, preferredStyle: .Alert)
-            alertController.addAction(UIAlertAction(title: "Dismiss", style: .Default, handler: nil))
-            presentViewController(alertController, animated: true, completion: nil)
+            presentAPIError(error.unbox)
         }
+    }
+
+    private func presentAPIError(error: APIError) {
+        let alertController = UIAlertController(title: error.title, message: error.message, preferredStyle: .Alert)
+        alertController.addAction(UIAlertAction(title: "Dismiss", style: .Default, handler: nil))
+        presentViewController(alertController, animated: true, completion: nil)
     }
 
     private func resetAnnotationsAndAnimation() {
         mapView.removeAnnotations(mapView.annotations)
         animationTime = 0.0
-        mapView.addAnnotations(dataState.features)
+        if let animationFeatures = dataState.viewModel?.animationFeatures {
+            let features = animationFeatures.map { $0.feature }
+            mapView.addAnnotations(features)
+        }
     }
 
     @IBAction func didTapPlayPauseButton(sender: AnyObject) {
@@ -131,12 +143,12 @@ final class MapViewController: UIViewController {
         animationTime += 0.1
     }
 
-    private func moveAnimationToTime(time: NSTimeInterval, fromTime: NSTimeInterval) {
-        for feature in dataState.features {
-            // TODO: Using time, fromTime, and the Feature's date, decide whether we can skip this lookup.
-
-            if let annotationView = mapView.viewForAnnotation(feature) as? FeatureAnnotationView {
-                annotationView.animationTime = time
+    private func moveAnimationToTime(time: NSTimeInterval) {
+        if let animationFeatures = dataState.viewModel?.animationFeatures {
+            for animationFeature in animationFeatures {
+                if let annotationView = mapView.viewForAnnotation(animationFeature.feature) as? FeatureAnnotationView {
+                    annotationView.animationInterpolant = (time - animationFeature.startTime) / animationFeature.duration
+                }
             }
         }
     }
@@ -186,7 +198,7 @@ extension MapViewController: MKMapViewDelegate {
 
     func mapView(mapView: MKMapView!, didSelectAnnotationView view: MKAnnotationView!) {
         // TODO: Seek to this annotation's point in the timeline.
-        (view as! FeatureAnnotationView).animationTime += 0.1
+        (view as! FeatureAnnotationView).animationInterpolant += 0.1
     }
 
 }

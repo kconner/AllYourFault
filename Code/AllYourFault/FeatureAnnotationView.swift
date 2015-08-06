@@ -14,10 +14,11 @@ final class FeatureAnnotationView: MKAnnotationView {
 
     private let rippleLayer = CALayer()
 
-    var animationTime: NSTimeInterval = 0.0 {
+    // Animation runs from 0.0 to 1.0.
+    var animationInterpolant: NSTimeInterval = 0.0 {
         didSet {
-            if animationTime != oldValue {
-                moveAnimationToTime(animationTime, fromTime: oldValue)
+            if animationInterpolant != oldValue {
+                moveAnimationToInterpolant(animationInterpolant, fromInterpolant: oldValue)
             }
         }
     }
@@ -42,6 +43,8 @@ final class FeatureAnnotationView: MKAnnotationView {
 
         rippleLayer.opacity = 0.0
         rippleLayer.transform = CATransform3DMakeScale(0.0, 0.0, 0.0)
+        // Disable implicit animations.
+        rippleLayer.actions = ["opacity": NSNull(), "transform": NSNull()]
         layer.addSublayer(rippleLayer)
     }
 
@@ -55,15 +58,15 @@ final class FeatureAnnotationView: MKAnnotationView {
 
     // MARK: Helpers
 
-    private func moveAnimationToTime(time: NSTimeInterval, fromTime: NSTimeInterval) {
+    private func moveAnimationToInterpolant(interpolant: NSTimeInterval, fromInterpolant: NSTimeInterval) {
         let maxScale: CGFloat = 10.0
         let maxOpacity: Float = 1.0
 
         let rippleScale: CGFloat
         let rippleOpacity: Float
 
-        if time <= 0.0 || 1.0 <= time {
-            if fromTime <= 0.0 || 1.0 <= fromTime {
+        if interpolant <= 0.0 || 1.0 <= interpolant {
+            if fromInterpolant <= 0.0 || 1.0 <= fromInterpolant {
                 // There is no significant work to do since neither timestamp is within the animation.
                 return
             }
@@ -72,13 +75,13 @@ final class FeatureAnnotationView: MKAnnotationView {
             rippleScale = 0.0
             rippleOpacity = 0.0
         } else {
-            rippleScale = maxScale * CGFloat(time)
+            rippleScale = maxScale * CGFloat(interpolant)
 
             // Fade in over the first fifth, then fade out over the remaining time.
-            if time < 0.2 {
-                rippleOpacity = maxOpacity * 5.0 * Float(time)
+            if interpolant < 0.2 {
+                rippleOpacity = maxOpacity * 5.0 * Float(interpolant)
             } else {
-                rippleOpacity = maxOpacity * 5.0 / 4.0 * (1.0 - Float(time))
+                rippleOpacity = maxOpacity * 5.0 / 4.0 * (1.0 - Float(interpolant))
             }
         }
 
@@ -91,7 +94,7 @@ final class FeatureAnnotationView: MKAnnotationView {
     override func prepareForReuse() {
         super.prepareForReuse()
 
-        animationTime = 0.0
+        animationInterpolant = 0.0
     }
 
 }
