@@ -21,16 +21,16 @@ final class FeatureTimelineView: UIView, UIScrollViewDelegate {
     private static let pointsPerAnimationSecond: CGFloat = 60.0
     private static let standardHeight: CGFloat = 64.0
 
-    let scrollView = UIScrollView(frame: CGRectZero)
+    let collectionView = UICollectionView(frame: CGRectZero, collectionViewLayout: UICollectionViewFlowLayout())
 
     weak var featureTimelineViewDelegate: FeatureTimelineViewDelegate?
 
     var currentAnimationTime: NSTimeInterval {
         get {
-            return NSTimeInterval(scrollView.contentOffset.x / FeatureTimelineView.pointsPerAnimationSecond)
+            return NSTimeInterval(collectionView.contentOffset.x / FeatureTimelineView.pointsPerAnimationSecond)
         }
         set {
-            scrollView.contentOffset = CGPointMake(round(CGFloat(newValue) * FeatureTimelineView.pointsPerAnimationSecond), 0.0)
+            collectionView.contentOffset = CGPointMake(round(CGFloat(newValue) * FeatureTimelineView.pointsPerAnimationSecond), 0.0)
         }
     }
 
@@ -47,7 +47,8 @@ final class FeatureTimelineView: UIView, UIScrollViewDelegate {
     }
 
     func prepareWithAnimatingFeatures(animationFeatures: [AnimatingFeature], animationDuration: NSTimeInterval, startDate: NSDate) {
-        // TODO: How will I use the data to configure this view?
+
+        // collectionView.contentSize = CGSizeMake(1000.0, FeatureTimelineView.standardHeight)
     }
 
     // MARK: UIView
@@ -59,12 +60,44 @@ final class FeatureTimelineView: UIView, UIScrollViewDelegate {
     // MARK: Helpers
 
     private func configureSubviews() {
-        scrollView.frame = self.bounds
-        scrollView.autoresizingMask = .FlexibleWidth | .FlexibleHeight
-        scrollView.delegate = self
-        // TODO: do this in prepare, and give it the right width
-        scrollView.contentSize = CGSizeMake(1000.0, FeatureTimelineView.standardHeight)
-        addSubview(scrollView)
+        collectionView.frame = self.bounds
+        collectionView.autoresizingMask = .FlexibleWidth | .FlexibleHeight
+        collectionView.dataSource = self
+        collectionView.delegate = self
+        collectionView.registerNib(UINib(nibName: "FeatureTimelineYearCell", bundle: nil), forCellWithReuseIdentifier: FeatureTimelineYearCell.reuseIdentifier)
+
+        let flowLayout = collectionView.collectionViewLayout as! UICollectionViewFlowLayout
+        flowLayout.scrollDirection = .Horizontal
+        flowLayout.minimumLineSpacing = 0.0
+        flowLayout.minimumInteritemSpacing = 0.0
+        flowLayout.sectionInset = UIEdgeInsetsZero
+
+        addSubview(collectionView)
+    }
+
+}
+
+extension FeatureTimelineView: UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
+
+    func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        // TODO: Based on the animation date ranges, decide the year range.
+        return 100
+    }
+
+    func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
+        let cell = collectionView.dequeueReusableCellWithReuseIdentifier(FeatureTimelineYearCell.reuseIdentifier, forIndexPath: indexPath) as! UICollectionViewCell
+
+        if let yearCell = cell as? FeatureTimelineYearCell {
+            // TODO: Configure with segment, not arbitrarily
+            yearCell.year = indexPath.row + 1933
+        }
+
+        return cell
+    }
+
+    func collectionView(collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAtIndexPath indexPath: NSIndexPath) -> CGSize {
+        // TODO: Width per segment should depend on the actual duration of that year.
+        return CGSizeMake(FeatureTimelineView.pointsPerAnimationSecond, FeatureTimelineView.standardHeight)
     }
 
 }
