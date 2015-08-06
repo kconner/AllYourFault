@@ -45,7 +45,15 @@ final class MapViewController: UIViewController {
 
     private var dataState = DataState.Empty {
         didSet {
-            replaceAnnotationsWithFeatures()
+            resetAnnotationsAndAnimation()
+        }
+    }
+
+    private var animationTime: NSTimeInterval = 0.0 {
+        didSet {
+            if animationTime != oldValue {
+                moveAnimationToTime(animationTime, fromTime: oldValue)
+            }
         }
     }
 
@@ -110,15 +118,29 @@ final class MapViewController: UIViewController {
         }
     }
 
-    private func replaceAnnotationsWithFeatures() {
+    private func resetAnnotationsAndAnimation() {
         mapView.removeAnnotations(mapView.annotations)
+        animationTime = 0.0
         mapView.addAnnotations(dataState.features)
     }
 
     @IBAction func didTapPlayPauseButton(sender: AnyObject) {
         isPlaying = !isPlaying
+
+        // TODO: Instead of manually advancing time, animate with a CADisplayLink.
+        animationTime += 0.1
     }
-    
+
+    private func moveAnimationToTime(time: NSTimeInterval, fromTime: NSTimeInterval) {
+        for feature in dataState.features {
+            // TODO: Using time, fromTime, and the Feature's date, decide whether we can skip this lookup.
+
+            if let annotationView = mapView.viewForAnnotation(feature) as? FeatureAnnotationView {
+                annotationView.animationTime = time
+            }
+        }
+    }
+
 }
 
 extension MapViewController: MKMapViewDelegate {

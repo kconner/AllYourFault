@@ -17,7 +17,7 @@ final class FeatureAnnotationView: MKAnnotationView {
     var animationTime: NSTimeInterval = 0.0 {
         didSet {
             if animationTime != oldValue {
-                animateToTime(animationTime, fromTime: oldValue)
+                moveAnimationToTime(animationTime, fromTime: oldValue)
             }
         }
     }
@@ -55,7 +55,7 @@ final class FeatureAnnotationView: MKAnnotationView {
 
     // MARK: Helpers
 
-    private func animateToTime(time: NSTimeInterval, fromTime: NSTimeInterval) {
+    private func moveAnimationToTime(time: NSTimeInterval, fromTime: NSTimeInterval) {
         let maxScale: CGFloat = 10.0
         let maxOpacity: Float = 1.0
 
@@ -85,4 +85,13 @@ final class FeatureAnnotationView: MKAnnotationView {
         rippleLayer.opacity = rippleOpacity
         rippleLayer.transform = CATransform3DMakeScale(rippleScale, rippleScale, rippleScale)
     }
+
+    // MARK: MKAnnotationView
+
+    override func prepareForReuse() {
+        super.prepareForReuse()
+
+        animationTime = 0.0
+    }
+
 }
