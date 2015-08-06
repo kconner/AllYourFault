@@ -1,5 +1,5 @@
 //
-//  TimelineView.swift
+//  FeatureTimelineView.swift
 //  AllYourFault
 //
 //  Created by Kevin Conner on 8/5/15.
@@ -10,27 +10,27 @@ import UIKit
 
 // A timeline for Features that the user can scrub through.
 
-protocol TimelineViewDelegate: class {
+protocol FeatureTimelineViewDelegate: class {
 
-    func timelineView(timelineView: TimelineView, didScrubToTime time: NSTimeInterval)
+    func featureTimelineView(featureTimelineView: FeatureTimelineView, didScrubToTime time: NSTimeInterval)
 
 }
 
-final class TimelineView: UIView, UIScrollViewDelegate {
+final class FeatureTimelineView: UIView, UIScrollViewDelegate {
 
     private static let pointsPerAnimationSecond: CGFloat = 60.0
     private static let standardHeight: CGFloat = 64.0
 
     let scrollView = UIScrollView(frame: CGRectZero)
 
-    weak var timelineViewDelegate: TimelineViewDelegate?
+    weak var featureTimelineViewDelegate: FeatureTimelineViewDelegate?
 
     var currentAnimationTime: NSTimeInterval {
         get {
-            return NSTimeInterval(scrollView.contentOffset.x / TimelineView.pointsPerAnimationSecond)
+            return NSTimeInterval(scrollView.contentOffset.x / FeatureTimelineView.pointsPerAnimationSecond)
         }
         set {
-            scrollView.contentOffset = CGPointMake(round(CGFloat(newValue) * TimelineView.pointsPerAnimationSecond), 0.0)
+            scrollView.contentOffset = CGPointMake(round(CGFloat(newValue) * FeatureTimelineView.pointsPerAnimationSecond), 0.0)
         }
     }
 
@@ -46,14 +46,14 @@ final class TimelineView: UIView, UIScrollViewDelegate {
         configureSubviews()
     }
 
-    func prepareWithAnimationFeatures(features: [MapViewModel.AnimationFeature]) {
+    func prepareWithAnimatingFeatures(animationFeatures: [AnimatingFeature], animationDuration: NSTimeInterval, startDate: NSDate) {
         // TODO: How will I use the data to configure this view?
     }
 
     // MARK: UIView
 
     override func intrinsicContentSize() -> CGSize {
-        return CGSizeMake(0.0, TimelineView.standardHeight)
+        return CGSizeMake(0.0, FeatureTimelineView.standardHeight)
     }
 
     // MARK: Helpers
@@ -63,18 +63,18 @@ final class TimelineView: UIView, UIScrollViewDelegate {
         scrollView.autoresizingMask = .FlexibleWidth | .FlexibleHeight
         scrollView.delegate = self
         // TODO: do this in prepare, and give it the right width
-        scrollView.contentSize = CGSizeMake(1000.0, TimelineView.standardHeight)
+        scrollView.contentSize = CGSizeMake(1000.0, FeatureTimelineView.standardHeight)
         addSubview(scrollView)
     }
 
 }
 
-extension TimelineView: UIScrollViewDelegate {
+extension FeatureTimelineView: UIScrollViewDelegate {
 
     func scrollViewDidScroll(scrollView: UIScrollView) {
         // Only report scrolling done by the user.
         if scrollView.tracking || scrollView.decelerating {
-            timelineViewDelegate?.timelineView(self, didScrubToTime: currentAnimationTime)
+            featureTimelineViewDelegate?.featureTimelineView(self, didScrubToTime: currentAnimationTime)
         }
     }
 

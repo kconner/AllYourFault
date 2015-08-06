@@ -1,5 +1,5 @@
 //
-//  MapViewController.swift
+//  FeatureMapViewController.swift
 //  AllYourFault
 //
 //  Created by Kevin Conner on 8/3/15.
@@ -13,15 +13,15 @@ import MapKit
 
 // Moving the map affects the data state.
 // The data state affects view configuration and animation availability.
-// When animaitons are available, the user can play and pause or scrub on the timeline.
+// When animations are available, the user can play and pause or scrub on the timeline.
 
-final class MapViewController: UIViewController {
+final class FeatureMapViewController: UIViewController {
 
     private enum DataState {
         case Empty
         case Loading(NSURLSessionTask)
-        case Populated(MapViewModel)
-        
+        case Populated(FeatureMapViewModel)
+
         var currentUpdateTask: NSURLSessionTask? {
             switch self {
             case .Loading(let task):
@@ -31,7 +31,7 @@ final class MapViewController: UIViewController {
             }
         }
         
-        var viewModel: MapViewModel? {
+        var viewModel: FeatureMapViewModel? {
             switch self {
             case .Populated(let viewModel):
                 return viewModel
@@ -43,7 +43,7 @@ final class MapViewController: UIViewController {
 
     @IBOutlet var mapView: MKMapView!
     @IBOutlet var playPauseButton: UIButton!
-    @IBOutlet var timelineView: TimelineView!
+    @IBOutlet var timelineView: FeatureTimelineView!
 
     private var lastMapRegion: MKCoordinateRegion!
 
@@ -75,7 +75,7 @@ final class MapViewController: UIViewController {
         lastMapRegion = mapView.region
         mapView.delegate = self
 
-        timelineView.timelineViewDelegate = self
+        timelineView.featureTimelineViewDelegate = self
 
         resetViewsForDataState()
     }
@@ -84,7 +84,7 @@ final class MapViewController: UIViewController {
 
 // MARK: Data state
 
-extension MapViewController {
+extension FeatureMapViewController {
 
     private func loadDataForMapRegion() {
         // Allow only one update task to run at a time.
@@ -118,7 +118,7 @@ extension MapViewController {
         switch result {
         case .Success(let features):
             if 0 < features.unbox.count {
-                let viewModel = MapViewModel(features: features.unbox)
+                let viewModel = FeatureMapViewModel(features: features.unbox)
                 dataState = .Populated(viewModel)
             } else {
                 dataState = .Empty
@@ -155,11 +155,11 @@ extension MapViewController {
             playPauseButton.enabled = false
         case .Populated(let viewModel):
             // TODO: Set up the timeline view
-            timelineView.prepareWithAnimationFeatures(viewModel.animationFeatures)
+            timelineView.prepareWithAnimatingFeatures(viewModel.animatingFeatures, animationDuration: viewModel.animationDuration, startDate: viewModel.firstDate)
             playPauseButton.enabled = true
         }
 
-        if let animationFeatures = dataState.viewModel?.animationFeatures {
+        if let animationFeatures = dataState.viewModel?.animatingFeatures {
             let features = animationFeatures.map { $0.feature }
             mapView.addAnnotations(features)
         }
@@ -169,7 +169,7 @@ extension MapViewController {
 
 // MARK: Animation
 
-extension MapViewController {
+extension FeatureMapViewController {
 
     var isAnimationAvailable: Bool {
         return dataState.viewModel != nil
@@ -211,7 +211,7 @@ extension MapViewController {
     }
 
     private func moveAnimationToTime(time: NSTimeInterval) {
-        if let animationFeatures = dataState.viewModel?.animationFeatures {
+        if let animationFeatures = dataState.viewModel?.animatingFeatures {
             for animationFeature in animationFeatures {
                 if let annotationView = mapView.viewForAnnotation(animationFeature.feature) as? FeatureAnnotationView {
                     annotationView.animationInterpolant = (time - animationFeature.startTime) / animationFeature.duration
@@ -222,7 +222,7 @@ extension MapViewController {
 
 }
 
-extension MapViewController: MKMapViewDelegate {
+extension FeatureMapViewController: MKMapViewDelegate {
 
     private func coordinateRegionsAreEqual(region1: MKCoordinateRegion, _ region2: MKCoordinateRegion) -> Bool {
         return region1.center.latitude == region2.center.latitude
@@ -270,9 +270,9 @@ extension MapViewController: MKMapViewDelegate {
 
 }
 
-extension MapViewController: TimelineViewDelegate {
+extension FeatureMapViewController: FeatureTimelineViewDelegate {
 
-    func timelineView(timelineView: TimelineView, didScrubToTime time: NSTimeInterval) {
+    func featureTimelineView(featureTimelineView: FeatureTimelineView, didScrubToTime time: NSTimeInterval) {
         if isAnimationAvailable {
             pauseAnimation()
             animationTime = time

@@ -8,12 +8,10 @@
 
 import Foundation
 
-// View model for the MapViewController's populated state.
+// View model for the FeatureMapViewController's populated state.
 // Keeps track of feature objects and animation parameters.
 
-struct MapViewModel {
-
-    typealias AnimationFeature = (feature: Feature, startTime: NSTimeInterval, duration: NSTimeInterval)
+struct FeatureMapViewModel {
 
     // Animate 365 days of history per second.
     static let animationTimePerRealTime: NSTimeInterval = 1.0 / (60 * 60 * 24 * 365)
@@ -21,11 +19,12 @@ struct MapViewModel {
     // Longest possible duration of a feature's ripple animation.
     static let featureAnimationDurationMax: NSTimeInterval = 2.0
 
-    // Duration of the entire map's animation over all features.
+    // The entire map's animation over all features.
     let animationDuration: NSTimeInterval
+    let animatingFeatures: [AnimatingFeature]
 
-    // Features collected with their animation scheduling parameters.
-    let animationFeatures: [AnimationFeature]
+    // The real date of the first feature.
+    let firstDate: NSDate
 
     init(features: [Feature]) {
         precondition(0 < features.count, "There should be at least one Feature.")
@@ -39,15 +38,16 @@ struct MapViewModel {
         let realDateInterval = lastDate.timeIntervalSinceDate(firstDate)
 
         // Time to animate from the beginning of the first feature animation to after the end of the last one.
-        animationDuration = realDateInterval * MapViewModel.animationTimePerRealTime + MapViewModel.featureAnimationDurationMax
+        animationDuration = realDateInterval * FeatureMapViewModel.animationTimePerRealTime + FeatureMapViewModel.featureAnimationDurationMax
 
-        animationFeatures = orderedFeatures.map { feature in
-            let startTime: NSTimeInterval = feature.date.timeIntervalSinceDate(firstDate) * MapViewModel.animationTimePerRealTime
+        animatingFeatures = orderedFeatures.map { feature in
+            let startTime: NSTimeInterval = feature.date.timeIntervalSinceDate(firstDate) * FeatureMapViewModel.animationTimePerRealTime
             // TODO: Interpolate duration using magnitude
-            let duration: NSTimeInterval = MapViewModel.featureAnimationDurationMax
-            return (feature: feature, startTime: startTime, duration: duration)
+            let duration: NSTimeInterval = FeatureMapViewModel.featureAnimationDurationMax
+            return AnimatingFeature(feature: feature, startTime: startTime, duration: duration)
         }
 
+        self.firstDate = firstDate
     }
 
 }

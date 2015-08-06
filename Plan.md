@@ -173,6 +173,8 @@ Using the API provided by the [USGS Earthquake Hazards Program](http://ehp2-eart
             - Scroll view with start and end time parameters
         - Loading state and empty state
         - Hard part is over; add cool stuff as needed
+        - Keep annotations visible and animation playing while new data loads
+        - Show and hide controls with animation availability, rather than disabling them
         - App icon
         - Launch screen
         - Memory, performance, battery, GPS usage testing
