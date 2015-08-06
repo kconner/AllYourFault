@@ -45,7 +45,7 @@ final class MapViewController: UIViewController {
 
     private var dataState = DataState.Empty {
         didSet {
-            resetAnnotationsAndAnimation()
+            resetViewsForDataState()
         }
     }
 
@@ -57,14 +57,10 @@ final class MapViewController: UIViewController {
         }
     }
 
-    private var isPlaying = false {
-        didSet {
-            if isPlaying {
-                playPauseButton.setImage(UIImage(named: "pause"), forState: .Normal)
-            } else {
-                playPauseButton.setImage(UIImage(named: "play"), forState: .Normal)
-            }
-        }
+    private var displayLink: CADisplayLink?
+
+    deinit {
+        displayLink?.invalidate()
     }
 
     // MARK: UIViewController
@@ -74,15 +70,15 @@ final class MapViewController: UIViewController {
 
         lastMapRegion = mapView.region
         mapView.delegate = self
+
+        resetViewsForDataState()
     }
 
-    // MARK: Helpers
+}
 
-    private var coordinateRegionForQuery: MKCoordinateRegion {
-        // TODO: 100 -> distance from top of timeline view to bottom of map view
-        let unobscuredRect = UIEdgeInsetsInsetRect(mapView.bounds, UIEdgeInsetsMake(0.0, 0.0, 100.0, 0.0))
-        return mapView.convertRect(unobscuredRect, toRegionFromView: mapView)
-    }
+// MARK: Data state
+
+extension MapViewController {
 
     private func loadDataForMapRegion() {
         // Allow only one update task to run at a time.
@@ -98,7 +94,7 @@ final class MapViewController: UIViewController {
                 let task = task
                 where task.taskIdentifier == strongSelf.dataState.currentUpdateTask?.taskIdentifier {
 
-                strongSelf.enterStateForResult(result)
+                strongSelf.enterStateForAPIResult(result)
             }
         }
 
@@ -106,7 +102,13 @@ final class MapViewController: UIViewController {
         task.resume()
     }
 
-    private func enterStateForResult(result: APIResult<[Feature], APIError>) {
+    private var coordinateRegionForQuery: MKCoordinateRegion {
+        // TODO: 100 -> distance from top of timeline view to bottom of map view
+        let unobscuredRect = UIEdgeInsetsInsetRect(mapView.bounds, UIEdgeInsetsMake(0.0, 0.0, 100.0, 0.0))
+        return mapView.convertRect(unobscuredRect, toRegionFromView: mapView)
+    }
+
+    private func enterStateForAPIResult(result: APIResult<[Feature], APIError>) {
         switch result {
         case .Success(let features):
             if 0 < features.unbox.count {
@@ -127,20 +129,72 @@ final class MapViewController: UIViewController {
         presentViewController(alertController, animated: true, completion: nil)
     }
 
-    private func resetAnnotationsAndAnimation() {
+    private func resetViewsForDataState() {
+        // Tear down views
         mapView.removeAnnotations(mapView.annotations)
+
+        // TODO: Hide loading state view, empty state view
+
+        // Reset animation state
+        pauseAnimation()
         animationTime = 0.0
+
+        // Set up views
+        switch dataState {
+        case .Empty:
+            // TODO: Show empty state
+            playPauseButton.enabled = false
+        case .Loading:
+            // TODO: Show loading state
+            playPauseButton.enabled = false
+        case .Populated:
+            // TODO: Any setup?
+            playPauseButton.enabled = true
+        }
+
         if let animationFeatures = dataState.viewModel?.animationFeatures {
             let features = animationFeatures.map { $0.feature }
             mapView.addAnnotations(features)
         }
     }
 
-    @IBAction func didTapPlayPauseButton(sender: AnyObject) {
-        isPlaying = !isPlaying
+}
 
-        // TODO: Instead of manually advancing time, animate with a CADisplayLink.
-        animationTime += 0.1
+// MARK: Animation
+
+extension MapViewController {
+
+    @IBAction func didTapPlayPauseButton(sender: AnyObject) {
+        if let displayLink = displayLink {
+            pauseAnimation()
+        } else {
+            playAnimation()
+        }
+    }
+
+    private func pauseAnimation() {
+        playPauseButton.setImage(UIImage(named: "play"), forState: .Normal)
+
+        invalidateDisplayLink()
+    }
+
+    private func playAnimation() {
+        playPauseButton.setImage(UIImage(named: "pause"), forState: .Normal)
+
+        invalidateDisplayLink()
+
+        let displayLink = CADisplayLink(target: self, selector: "advanceAnimation:")
+        self.displayLink = displayLink
+        displayLink.addToRunLoop(NSRunLoop.mainRunLoop(), forMode: NSDefaultRunLoopMode) // TODO: Correct run loop mode?
+    }
+
+    private func invalidateDisplayLink() {
+        displayLink?.invalidate()
+        displayLink = nil
+    }
+
+    func advanceAnimation(displayLink: CADisplayLink) {
+        animationTime += displayLink.duration
     }
 
     private func moveAnimationToTime(time: NSTimeInterval) {
