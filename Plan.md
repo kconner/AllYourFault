@@ -171,6 +171,7 @@ Using the API provided by the [USGS Earthquake Hazards Program](http://ehp2-eart
         - Animate by display link
         - Timeline view
             - Scroll view with start and end time parameters
+        - Loading state and empty state
         - Hard part is over; add cool stuff as needed
         - App icon
         - Launch screen

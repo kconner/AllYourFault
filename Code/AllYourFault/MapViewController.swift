@@ -10,7 +10,10 @@ import UIKit
 import MapKit
 
 // The app's main view.
-// Chain of effects: mapView.region, lastMapRegion -> dataState -> mapView.annotations
+
+// Moving the map affects the data state.
+// The data state affects view configuration and animation availability.
+// When animaitons are available, the user can play and pause or scrub on the timeline.
 
 final class MapViewController: UIViewController {
 
@@ -40,6 +43,7 @@ final class MapViewController: UIViewController {
 
     @IBOutlet var mapView: MKMapView!
     @IBOutlet var playPauseButton: UIButton!
+    @IBOutlet var timelineView: TimelineView!
 
     private var lastMapRegion: MKCoordinateRegion!
 
@@ -70,6 +74,8 @@ final class MapViewController: UIViewController {
 
         lastMapRegion = mapView.region
         mapView.delegate = self
+
+        timelineView.timelineViewDelegate = self
 
         resetViewsForDataState()
     }
@@ -147,8 +153,9 @@ extension MapViewController {
         case .Loading:
             // TODO: Show loading state
             playPauseButton.enabled = false
-        case .Populated:
-            // TODO: Any setup?
+        case .Populated(let viewModel):
+            // TODO: Set up the timeline view
+            timelineView.prepareWithAnimationFeatures(viewModel.animationFeatures)
             playPauseButton.enabled = true
         }
 
@@ -163,6 +170,10 @@ extension MapViewController {
 // MARK: Animation
 
 extension MapViewController {
+
+    var isAnimationAvailable: Bool {
+        return dataState.viewModel != nil
+    }
 
     @IBAction func didTapPlayPauseButton(sender: AnyObject) {
         if let displayLink = displayLink {
@@ -195,6 +206,8 @@ extension MapViewController {
 
     func advanceAnimation(displayLink: CADisplayLink) {
         animationTime += displayLink.duration
+
+        timelineView.currentAnimationTime = animationTime
     }
 
     private func moveAnimationToTime(time: NSTimeInterval) {
@@ -253,6 +266,17 @@ extension MapViewController: MKMapViewDelegate {
     func mapView(mapView: MKMapView!, didSelectAnnotationView view: MKAnnotationView!) {
         // TODO: Seek to this annotation's point in the timeline.
         (view as! FeatureAnnotationView).animationInterpolant += 0.1
+    }
+
+}
+
+extension MapViewController: TimelineViewDelegate {
+
+    func timelineView(timelineView: TimelineView, didScrubToTime time: NSTimeInterval) {
+        if isAnimationAvailable {
+            pauseAnimation()
+            animationTime = time
+        }
     }
 
 }

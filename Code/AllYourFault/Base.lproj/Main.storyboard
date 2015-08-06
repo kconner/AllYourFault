@@ -20,12 +20,9 @@
                             <mapView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" mapType="standard" translatesAutoresizingMaskIntoConstraints="NO" id="Lsj-gW-u8f">
                                 <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                             </mapView>
-                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="y4Q-UO-sIn">
+                            <view contentMode="scaleToFill" placeholderIntrinsicWidth="488" placeholderIntrinsicHeight="64" translatesAutoresizingMaskIntoConstraints="NO" id="y4Q-UO-sIn" customClass="TimelineView" customModule="AllYourFault" customModuleProvider="target">
                                 <rect key="frame" x="96" y="520" width="488" height="64"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                                <constraints>
-                                    <constraint firstAttribute="height" constant="64" id="Z6h-dd-eVe"/>
-                                </constraints>
                             </view>
                             <button opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" horizontalCompressionResistancePriority="751" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="NBf-fd-CCr">
                                 <rect key="frame" x="16" y="520" width="64" height="64"/>
@@ -53,6 +50,7 @@
                     <connections>
                         <outlet property="mapView" destination="Lsj-gW-u8f" id="NKj-b1-nZD"/>
                         <outlet property="playPauseButton" destination="NBf-fd-CCr" id="2nv-gG-OS0"/>
+                        <outlet property="timelineView" destination="y4Q-UO-sIn" id="SfV-TF-qUj"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
