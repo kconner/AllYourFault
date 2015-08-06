@@ -39,6 +39,9 @@ final class MapViewController: UIViewController {
     }
 
     @IBOutlet var mapView: MKMapView!
+    @IBOutlet var playPauseButton: UIButton!
+
+    private var lastMapRegion: MKCoordinateRegion!
 
     private var dataState = DataState.Empty {
         didSet {
@@ -46,7 +49,15 @@ final class MapViewController: UIViewController {
         }
     }
 
-    private var lastMapRegion: MKCoordinateRegion!
+    private var isPlaying = false {
+        didSet {
+            if isPlaying {
+                playPauseButton.setImage(UIImage(named: "pause"), forState: .Normal)
+            } else {
+                playPauseButton.setImage(UIImage(named: "play"), forState: .Normal)
+            }
+        }
+    }
 
     // MARK: UIViewController
 
@@ -102,6 +113,10 @@ final class MapViewController: UIViewController {
     private func replaceAnnotationsWithFeatures() {
         mapView.removeAnnotations(mapView.annotations)
         mapView.addAnnotations(dataState.features)
+    }
+
+    @IBAction func didTapPlayPauseButton(sender: AnyObject) {
+        isPlaying = !isPlaying
     }
     
 }
