@@ -48,16 +48,15 @@ final class MapPlist {
         }
     }
 
-    class func dictionary(value: PlistValue) -> [String: AnyObject]? {
-        return value as? [String: AnyObject]
+    class func dictionary(value: PlistValue) -> NSDictionary? {
+        return value as? NSDictionary
     }
 
     // This function is curried so as to produce a mapping function for a given item type.
     // mapItem is used to map each item of the array.
     // When strict, if any item fails to map, the whole array will fail. Otherwise failed items are omitted.
-
     class func array<T>(strict: Bool = true, mapItem: PlistValue -> T?)(_ value: PlistValue) -> [T]? {
-        if let array = value as? [AnyObject] {
+        if let array = value as? NSArray {
             var result: [T] = []
 
             for item in array {
