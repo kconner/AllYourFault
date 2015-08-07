@@ -328,26 +328,14 @@ extension FeatureMapViewController: MKMapViewDelegate {
         let reuseIdentifier = "FeatureAnnotation"
 
         if let feature = annotation as? Feature {
-            let annotationView: FeatureAnnotationView
             if let existingAnnotationView = mapView.dequeueReusableAnnotationViewWithIdentifier(reuseIdentifier) as? FeatureAnnotationView {
-                annotationView = existingAnnotationView
+                return existingAnnotationView
             } else {
-                annotationView = FeatureAnnotationView(annotation: annotation, reuseIdentifier: reuseIdentifier)
+                return FeatureAnnotationView(annotation: annotation, reuseIdentifier: reuseIdentifier)
             }
-
-            configureFeatureAnnotationView(annotationView, withFeature: feature)
-            return annotationView
         } else {
             preconditionFailure("Only Features should be used for annotations.")
         }
-    }
-
-    private func configureFeatureAnnotationView(annotationView: FeatureAnnotationView, withFeature feature: Feature) {
-        // TODO
-    }
-
-    func mapView(mapView: MKMapView!, didSelectAnnotationView view: MKAnnotationView!) {
-        // TODO: Seek to this annotation's point in the timeline.
     }
 
 }

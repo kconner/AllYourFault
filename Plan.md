@@ -175,10 +175,9 @@ Using the API provided by the [USGS Earthquake Hazards Program](http://ehp2-eart
             - Dots on cells for features in that year
         - Loading message and empty message
         - Show and hide controls and loading / empty message
-        - Style adjustments
-        - Simultaneous animation and loading
         - Keep annotations visible and animation playing while new data loads
-        - Show and hide controls with animation availability, rather than disabling them
+        - Style adjustments
+        - Ripple image
         - App icon
         - Launch screen
         - Memory, performance, battery, GPS usage testing

@@ -25,6 +25,13 @@ final class FeatureTimelineView: RoundedCornerView, UIScrollViewDelegate {
 
     weak var featureTimelineViewDelegate: FeatureTimelineViewDelegate?
 
+    lazy var dateFormatter: NSDateFormatter = {
+        let formatter = NSDateFormatter()
+        // TODO: This doesn't update when the system locale changes, but I think I can live with that for a code test.
+        formatter.dateFormat = NSDateFormatter.dateFormatFromTemplate("M/d", options: 0, locale: NSLocale.currentLocale())
+        return formatter
+    }()
+
     var currentAnimationTime: NSTimeInterval {
         get {
             return NSTimeInterval((collectionView.contentOffset.x - animationPointOffset) / FeatureTimelineView.pointsPerAnimationSecond)
@@ -92,7 +99,6 @@ final class FeatureTimelineView: RoundedCornerView, UIScrollViewDelegate {
         // When during the first day does the overall animation begin?
         let animationTimeOffset = firstDate.timeIntervalSinceDate(firstDayStartDate) * FeatureMapViewModel.animationTimePerRealTime
 
-        var day = dayDateComponents.day
         var dayStartDate = firstDayStartDate
         var dayEndDate: NSDate! = calendar.dateByAddingComponents(oneDayComponents, toDate: dayStartDate, options: nil)
         var dayStartIndex = 0
@@ -101,7 +107,7 @@ final class FeatureTimelineView: RoundedCornerView, UIScrollViewDelegate {
         let saveDayWithEndIndex: Int -> Void = { dayEndIndex in
             // Save the day's view model.
             let dayFeatures = animatingFeatures[dayStartIndex..<dayEndIndex]
-            let dateString = String(day) // TODO: Use a date formatter instead
+            let dateString = self.dateFormatter.stringFromDate(dayStartDate)
             let animationDuration = dayEndDate.timeIntervalSinceDate(dayStartDate) * FeatureMapViewModel.animationTimePerRealTime
             days.append(FeatureTimelineDay(animatingFeatures: dayFeatures,
                 dateString: dateString,
@@ -109,7 +115,6 @@ final class FeatureTimelineView: RoundedCornerView, UIScrollViewDelegate {
                 animationDuration: animationDuration))
 
             // Advance parameters to the next day.
-            ++day
             dayStartDate = dayEndDate
             dayEndDate = calendar.dateByAddingComponents(oneDayComponents, toDate: dayStartDate, options: nil)
             dayStartIndex = dayEndIndex

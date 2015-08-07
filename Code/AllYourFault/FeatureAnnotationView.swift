@@ -33,8 +33,7 @@ final class FeatureAnnotationView: MKAnnotationView {
         image = UIImage(named: "annotation")
         let imageSize = image.size
 
-        // TODO: custom ripple image
-        if let rippleImage = UIImage(named: "annotation") {
+        if let rippleImage = UIImage(named: "ripple") {
             rippleLayer.contents = rippleImage.CGImage
             rippleLayer.bounds = CGRect(origin: CGPointZero, size: rippleImage.size)
             rippleLayer.position = CGPointMake(imageSize.width / 2.0, imageSize.height / 2.0)
@@ -61,7 +60,6 @@ final class FeatureAnnotationView: MKAnnotationView {
     // MARK: Helpers
 
     private func moveAnimationToInterpolant(interpolant: NSTimeInterval, fromInterpolant: NSTimeInterval) {
-        let maxScale: CGFloat = 10.0
         let maxOpacity: Float = 1.0
 
         let rippleScale: CGFloat
@@ -82,8 +80,12 @@ final class FeatureAnnotationView: MKAnnotationView {
             // Fade in over the first fifth, then fade out over the remaining time.
             if interpolant < 0.2 {
                 rippleOpacity = maxOpacity * 5.0 * Float(interpolant)
+            } else if interpolant < 0.5 {
+                rippleOpacity = 1.0
             } else {
-                rippleOpacity = maxOpacity * 5.0 / 4.0 * (1.0 - Float(interpolant))
+                // Quadratic ease-in from 0.5 to 1.0
+                let squareTerm = 2.0 * (Float(interpolant) - 0.5)
+                rippleOpacity = maxOpacity * (1.0 - squareTerm * squareTerm)
             }
         }
 
