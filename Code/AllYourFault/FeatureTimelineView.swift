@@ -34,7 +34,6 @@ final class FeatureTimelineView: UIView, UIScrollViewDelegate {
             collectionView.contentOffset = CGPointMake(animationPointOffset + round(CGFloat(newValue) * FeatureTimelineView.pointsPerAnimationSecond), 0.0)
         }
     }
-    // TODO: Need to save and restore this value across a size class transition so we scroll to the right place.
 
     private var days: [FeatureTimelineDay] = []
 

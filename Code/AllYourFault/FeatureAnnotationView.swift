@@ -14,6 +14,8 @@ final class FeatureAnnotationView: MKAnnotationView {
 
     private let rippleLayer = CALayer()
 
+    var finalScale: CGFloat = 0.0
+
     // Animation runs from 0.0 to 1.0.
     var animationInterpolant: NSTimeInterval = 0.0 {
         didSet {
@@ -75,7 +77,7 @@ final class FeatureAnnotationView: MKAnnotationView {
             rippleScale = 0.0
             rippleOpacity = 0.0
         } else {
-            rippleScale = maxScale * CGFloat(interpolant)
+            rippleScale = finalScale * CGFloat(interpolant)
 
             // Fade in over the first fifth, then fade out over the remaining time.
             if interpolant < 0.2 {

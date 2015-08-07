@@ -80,6 +80,13 @@ final class FeatureMapViewController: UIViewController {
         resetViewsForDataState()
     }
 
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+
+        // Maintain view animation time on rotation.
+        timelineView.currentAnimationTime = animationTime
+    }
+
 }
 
 // MARK: Data state
@@ -214,6 +221,7 @@ extension FeatureMapViewController {
         if let animationFeatures = dataState.viewModel?.animatingFeatures {
             for animationFeature in animationFeatures {
                 if let annotationView = mapView.viewForAnnotation(animationFeature.feature) as? FeatureAnnotationView {
+                    annotationView.finalScale = animationFeature.scale
                     annotationView.animationInterpolant = (time - animationFeature.startTime) / animationFeature.duration
                 }
             }
@@ -265,7 +273,6 @@ extension FeatureMapViewController: MKMapViewDelegate {
 
     func mapView(mapView: MKMapView!, didSelectAnnotationView view: MKAnnotationView!) {
         // TODO: Seek to this annotation's point in the timeline.
-        (view as! FeatureAnnotationView).animationInterpolant += 0.1
     }
 
 }

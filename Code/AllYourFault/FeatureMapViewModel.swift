@@ -16,9 +16,6 @@ struct FeatureMapViewModel {
     // Animate one day of history per second.
     static let animationTimePerRealTime: NSTimeInterval = 1.0 / (60 * 60 * 24)
 
-    // Longest possible duration of a feature's ripple animation.
-    static let featureAnimationDurationMax: NSTimeInterval = 2.0
-
     // The entire map's animation over all features.
     let animationDuration: NSTimeInterval
     let animatingFeatures: [AnimatingFeature]
@@ -38,13 +35,11 @@ struct FeatureMapViewModel {
         let realDateInterval = lastDate.timeIntervalSinceDate(firstDate)
 
         // Time to animate from the beginning of the first feature animation to after the end of the last one.
-        animationDuration = realDateInterval * FeatureMapViewModel.animationTimePerRealTime + FeatureMapViewModel.featureAnimationDurationMax
+        animationDuration = realDateInterval * FeatureMapViewModel.animationTimePerRealTime + AnimatingFeature.animationDurationMax
 
         animatingFeatures = orderedFeatures.map { feature in
             let startTime: NSTimeInterval = feature.date.timeIntervalSinceDate(firstDate) * FeatureMapViewModel.animationTimePerRealTime
-            // TODO: Interpolate duration using magnitude
-            let duration: NSTimeInterval = FeatureMapViewModel.featureAnimationDurationMax
-            return AnimatingFeature(feature: feature, startTime: startTime, duration: duration)
+            return AnimatingFeature(feature: feature, startTime: startTime)
         }
 
         self.firstDate = firstDate
