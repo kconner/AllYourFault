@@ -41,9 +41,14 @@ final class FeatureMapViewController: UIViewController {
         }
     }
 
+    private static let messageViewVerticalMargin: CGFloat = 8.0
     private static let controlsVerticalMargin: CGFloat = 16.0
+    private static let controlsOutsetWhenHidden: CGFloat = 32.0
 
     @IBOutlet var mapView: MKMapView!
+    @IBOutlet var messageView: UIView!
+    @IBOutlet var messageLabel: UILabel!
+    @IBOutlet var messageViewTopConstraint: NSLayoutConstraint!
     @IBOutlet var playPauseButton: UIButton!
     @IBOutlet var timelineView: FeatureTimelineView!
     @IBOutlet var timelineViewBottomConstraint: NSLayoutConstraint!
@@ -155,32 +160,25 @@ extension FeatureMapViewController {
         pauseAnimation()
         animationTime = 0.0
 
+        let message: String?
         let showMessageView: Bool
         let showControls: Bool
 
         // Set up views
         switch dataState {
         case .Empty:
-            // TODO: Show empty state
-            playPauseButton.enabled = false
-
-            showMessageView = true
+            message = "We didn't find any recent earthquakes here."
             showControls = false
         case .Loading:
-            // TODO: Show loading state
-            playPauseButton.enabled = false
-            showMessageView = true
+            message = "Loading…"
             showControls = false
-            timelineViewBottomConstraint.constant = -FeatureTimelineView.standardHeight
         case .Populated(let viewModel):
-            // TODO: Set up the timeline view
-            showMessageView = false
+            message = nil
             showControls = true
             timelineView.prepareWithAnimatingFeatures(viewModel.animatingFeatures, animationDuration: viewModel.animationDuration, firstDate: viewModel.firstDate)
-            playPauseButton.enabled = true
         }
 
-        setShowingMessageView(showMessageView, showingControls: showControls, animated: animated)
+        setMessage(message, showingControls: showControls, animated: animated)
 
         if let animationFeatures = dataState.viewModel?.animatingFeatures {
             let features = animationFeatures.map { $0.feature }
@@ -188,13 +186,16 @@ extension FeatureMapViewController {
         }
     }
 
-    private func setShowingMessageView(showMessageView: Bool, showingControls showControls: Bool, animated: Bool) {
+    private func setMessage(message: String?, showingControls showControls: Bool, animated: Bool) {
         // Show or hide the message view.
         let adjustViews: () -> Void = {
-            if showMessageView {
-                // TODO
+            if let message = message {
+                self.messageLabel.text = message
+                self.messageViewTopConstraint.constant = FeatureMapViewController.messageViewVerticalMargin
+                self.messageView.alpha = 1.0
             } else {
-                // TODO
+                self.messageViewTopConstraint.constant = FeatureMapViewController.messageViewVerticalMargin - FeatureMapViewController.controlsOutsetWhenHidden
+                self.messageView.alpha = 0.0
             }
 
             if showControls {
@@ -202,7 +203,7 @@ extension FeatureMapViewController {
                 self.playPauseButton.alpha = 1.0
                 self.timelineView.alpha = 1.0
             } else {
-                self.timelineViewBottomConstraint.constant = -FeatureMapViewController.controlsVerticalMargin
+                self.timelineViewBottomConstraint.constant = FeatureMapViewController.controlsVerticalMargin - FeatureMapViewController.controlsOutsetWhenHidden
                 self.playPauseButton.alpha = 0.0
                 self.timelineView.alpha = 0.0
             }

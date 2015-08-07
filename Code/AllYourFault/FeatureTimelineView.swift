@@ -16,12 +16,11 @@ protocol FeatureTimelineViewDelegate: class {
 
 }
 
-final class FeatureTimelineView: UIView, UIScrollViewDelegate {
+final class FeatureTimelineView: RoundedCornerView, UIScrollViewDelegate {
 
     private static let pointsPerAnimationSecond: CGFloat = 120.0
     static let standardHeight: CGFloat = 64.0
 
-    private let maskLayer = CAShapeLayer()
     private let collectionView = UICollectionView(frame: CGRectZero, collectionViewLayout: UICollectionViewFlowLayout())
 
     weak var featureTimelineViewDelegate: FeatureTimelineViewDelegate?
@@ -55,8 +54,6 @@ final class FeatureTimelineView: UIView, UIScrollViewDelegate {
     }
 
     private func configureView() {
-        self.layer.mask = maskLayer
-
         collectionView.frame = self.bounds
         collectionView.autoresizingMask = .FlexibleWidth | .FlexibleHeight
         // TODO: Specific colors
@@ -150,17 +147,6 @@ final class FeatureTimelineView: UIView, UIScrollViewDelegate {
 
     override func intrinsicContentSize() -> CGSize {
         return CGSizeMake(0.0, FeatureTimelineView.standardHeight)
-    }
-
-    // MARK: CALayerDelegate
-
-    override func layoutSublayersOfLayer(layer: CALayer!) {
-        super.layoutSublayersOfLayer(layer)
-
-        if layer == self.layer {
-            maskLayer.frame = layer.bounds
-            maskLayer.path = UIBezierPath(roundedRect: maskLayer.bounds, cornerRadius: 10.0).CGPath
-        }
     }
 
 }

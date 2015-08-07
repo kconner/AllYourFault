@@ -33,12 +33,34 @@
                                 <rect key="frame" x="96" y="520" width="488" height="64"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                             </view>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="5K4-Ls-ap1" userLabel="Message View" customClass="RoundedCornerView" customModule="AllYourFault" customModuleProvider="target">
+                                <rect key="frame" x="16" y="28" width="568" height="30.5"/>
+                                <subviews>
+                                    <label userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Message" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="6pL-cs-nAl">
+                                        <rect key="frame" x="8" y="8" width="552" height="14.5"/>
+                                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                        <fontDescription key="fontDescription" style="UICTFontTextStyleFootnote"/>
+                                        <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                </subviews>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                <constraints>
+                                    <constraint firstAttribute="trailing" secondItem="6pL-cs-nAl" secondAttribute="trailing" constant="8" id="LmQ-ed-Hmg"/>
+                                    <constraint firstAttribute="bottom" secondItem="6pL-cs-nAl" secondAttribute="bottom" constant="8" id="XSO-E0-Mvg"/>
+                                    <constraint firstItem="6pL-cs-nAl" firstAttribute="leading" secondItem="5K4-Ls-ap1" secondAttribute="leading" constant="8" id="YAB-Ww-HLT"/>
+                                    <constraint firstItem="6pL-cs-nAl" firstAttribute="top" secondItem="5K4-Ls-ap1" secondAttribute="top" constant="8" id="Zzs-s1-4w2"/>
+                                </constraints>
+                            </view>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                         <constraints>
                             <constraint firstItem="y4Q-UO-sIn" firstAttribute="leading" secondItem="NBf-fd-CCr" secondAttribute="trailing" constant="16" id="BUE-g5-z8J"/>
                             <constraint firstItem="y4Q-UO-sIn" firstAttribute="trailing" secondItem="8bC-Xf-vdC" secondAttribute="trailingMargin" id="GJi-1s-HoO"/>
                             <constraint firstItem="y4Q-UO-sIn" firstAttribute="centerY" secondItem="NBf-fd-CCr" secondAttribute="centerY" id="KBz-zY-7FI"/>
+                            <constraint firstAttribute="trailing" secondItem="5K4-Ls-ap1" secondAttribute="trailing" constant="16" id="Pi6-zs-eGd"/>
+                            <constraint firstItem="5K4-Ls-ap1" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" constant="16" id="U1b-hj-H30"/>
+                            <constraint firstItem="5K4-Ls-ap1" firstAttribute="top" secondItem="y3c-jy-aDJ" secondAttribute="bottom" constant="8" id="U8e-v9-hGe"/>
                             <constraint firstItem="Lsj-gW-u8f" firstAttribute="top" secondItem="8bC-Xf-vdC" secondAttribute="top" id="cDn-zM-6w2"/>
                             <constraint firstAttribute="trailing" secondItem="Lsj-gW-u8f" secondAttribute="trailing" id="dFT-sr-IXF"/>
                             <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="y4Q-UO-sIn" secondAttribute="bottom" constant="16" id="ldR-OP-Bey"/>
@@ -49,6 +71,9 @@
                     </view>
                     <connections>
                         <outlet property="mapView" destination="Lsj-gW-u8f" id="NKj-b1-nZD"/>
+                        <outlet property="messageLabel" destination="6pL-cs-nAl" id="R3Y-bH-Qvk"/>
+                        <outlet property="messageView" destination="5K4-Ls-ap1" id="8cr-A9-x1H"/>
+                        <outlet property="messageViewTopConstraint" destination="U8e-v9-hGe" id="abo-9S-WJ5"/>
                         <outlet property="playPauseButton" destination="NBf-fd-CCr" id="2nv-gG-OS0"/>
                         <outlet property="timelineView" destination="y4Q-UO-sIn" id="hgh-Ep-2SW"/>
                         <outlet property="timelineViewBottomConstraint" destination="ldR-OP-Bey" id="4SO-8q-Cas"/>
