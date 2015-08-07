@@ -174,6 +174,7 @@ Using the API provided by the [USGS Earthquake Hazards Program](http://ehp2-eart
             - Collection view with cells per year
             - Dots on cells for features in that year
         - Loading state and empty state
+        - Style adjustments
         - Hard part is over; add cool stuff as needed
         - Keep annotations visible and animation playing while new data loads
         - Show and hide controls with animation availability, rather than disabling them

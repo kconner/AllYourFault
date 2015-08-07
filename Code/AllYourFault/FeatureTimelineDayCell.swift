@@ -56,11 +56,8 @@ final class FeatureTimelineDayCell: UICollectionViewCell {
             featureTimelineDay.dateString.drawAtPoint(CGPointMake(3.0, rect.height - 15.0), withAttributes: FeatureTimelineDayCell.textAttributes)
             
             // Draw dots for each feature.
-            // TODO: Vertical lines instead?
-
-            // With a radius of one point and rounding to whole points, dots won't be cut off on cell boundaries.
-            // Then, the day begins halfway through the cell's first point, at the right edge of the hash.
-            let dotRect = CGRectMake(-2.0, -2.0, 4.0, 4.0)
+            let dotRadius: CGFloat = 1.5
+            let dotRect = CGRectMake(-dotRadius, -dotRadius, dotRadius * 2.0, dotRadius * 2.0)
             for animatingFeature in featureTimelineDay.animatingFeatures {
                 let xOffset = rect.width * CGFloat((animatingFeature.startTime - featureTimelineDay.animationStartTime) / featureTimelineDay.animationDuration)
                 let yOffset = rect.height * (1.0 - CGFloat(animatingFeature.feature.magnitude / AnimatingFeature.magnitudeMax))
