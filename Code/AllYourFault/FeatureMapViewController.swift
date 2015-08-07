@@ -41,15 +41,18 @@ final class FeatureMapViewController: UIViewController {
         }
     }
 
+    private static let controlsVerticalMargin: CGFloat = 16.0
+
     @IBOutlet var mapView: MKMapView!
     @IBOutlet var playPauseButton: UIButton!
     @IBOutlet var timelineView: FeatureTimelineView!
+    @IBOutlet var timelineViewBottomConstraint: NSLayoutConstraint!
 
     private var lastMapRegion: MKCoordinateRegion!
 
     private var dataState = DataState.Empty {
         didSet {
-            resetViewsForDataState()
+            resetViewsForDataStateAnimated(true)
         }
     }
 
@@ -77,7 +80,7 @@ final class FeatureMapViewController: UIViewController {
 
         timelineView.featureTimelineViewDelegate = self
 
-        resetViewsForDataState()
+        resetViewsForDataStateAnimated(false)
     }
 
     override func viewDidLayoutSubviews() {
@@ -116,8 +119,8 @@ extension FeatureMapViewController {
     }
 
     private var coordinateRegionForQuery: MKCoordinateRegion {
-        // TODO: 100 -> distance from top of timeline view to bottom of map view
-        let unobscuredRect = UIEdgeInsetsInsetRect(mapView.bounds, UIEdgeInsetsMake(0.0, 0.0, 100.0, 0.0))
+        let insets = UIEdgeInsetsMake(0.0, 0.0, FeatureTimelineView.standardHeight + FeatureMapViewController.controlsVerticalMargin, 0.0)
+        let unobscuredRect = UIEdgeInsetsInsetRect(mapView.bounds, insets)
         return mapView.convertRect(unobscuredRect, toRegionFromView: mapView)
     }
 
@@ -142,7 +145,7 @@ extension FeatureMapViewController {
         presentViewController(alertController, animated: true, completion: nil)
     }
 
-    private func resetViewsForDataState() {
+    private func resetViewsForDataStateAnimated(animated: Bool) {
         // Tear down views
         mapView.removeAnnotations(mapView.annotations)
 
@@ -152,19 +155,32 @@ extension FeatureMapViewController {
         pauseAnimation()
         animationTime = 0.0
 
+        let showMessageView: Bool
+        let showControls: Bool
+
         // Set up views
         switch dataState {
         case .Empty:
             // TODO: Show empty state
             playPauseButton.enabled = false
+
+            showMessageView = true
+            showControls = false
         case .Loading:
             // TODO: Show loading state
             playPauseButton.enabled = false
+            showMessageView = true
+            showControls = false
+            timelineViewBottomConstraint.constant = -FeatureTimelineView.standardHeight
         case .Populated(let viewModel):
             // TODO: Set up the timeline view
+            showMessageView = false
+            showControls = true
             timelineView.prepareWithAnimatingFeatures(viewModel.animatingFeatures, animationDuration: viewModel.animationDuration, firstDate: viewModel.firstDate)
             playPauseButton.enabled = true
         }
+
+        setShowingMessageView(showMessageView, showingControls: showControls, animated: animated)
 
         if let animationFeatures = dataState.viewModel?.animatingFeatures {
             let features = animationFeatures.map { $0.feature }
@@ -172,9 +188,39 @@ extension FeatureMapViewController {
         }
     }
 
+    private func setShowingMessageView(showMessageView: Bool, showingControls showControls: Bool, animated: Bool) {
+        // Show or hide the message view.
+        let adjustViews: () -> Void = {
+            if showMessageView {
+                // TODO
+            } else {
+                // TODO
+            }
+
+            if showControls {
+                self.timelineViewBottomConstraint.constant = FeatureMapViewController.controlsVerticalMargin
+                self.playPauseButton.alpha = 1.0
+                self.timelineView.alpha = 1.0
+            } else {
+                self.timelineViewBottomConstraint.constant = -FeatureMapViewController.controlsVerticalMargin
+                self.playPauseButton.alpha = 0.0
+                self.timelineView.alpha = 0.0
+            }
+        }
+        
+        if animated {
+            UIView.animateWithDuration(0.15, delay: 0.0, options: .BeginFromCurrentState, animations: {
+                adjustViews()
+                self.view.layoutIfNeeded()
+            }, completion: nil)
+        } else {
+            adjustViews()
+        }
+    }
+
 }
 
-// MARK: Animation
+// MARK: Feature Animation
 
 extension FeatureMapViewController {
 

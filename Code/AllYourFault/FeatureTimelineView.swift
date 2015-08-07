@@ -19,7 +19,7 @@ protocol FeatureTimelineViewDelegate: class {
 final class FeatureTimelineView: UIView, UIScrollViewDelegate {
 
     private static let pointsPerAnimationSecond: CGFloat = 120.0
-    private static let standardHeight: CGFloat = 64.0
+    static let standardHeight: CGFloat = 64.0
 
     private let maskLayer = CAShapeLayer()
     private let collectionView = UICollectionView(frame: CGRectZero, collectionViewLayout: UICollectionViewFlowLayout())
