@@ -21,10 +21,13 @@ final class FeatureMapViewController: UIViewController {
         case Empty
         case Loading(NSURLSessionTask)
         case Populated(FeatureMapViewModel)
+        case PopulatedAndLoading(NSURLSessionTask, FeatureMapViewModel)
 
         var currentUpdateTask: NSURLSessionTask? {
             switch self {
             case .Loading(let task):
+                return task
+            case .PopulatedAndLoading(let task, _):
                 return task
             default:
                 return nil
@@ -34,6 +37,8 @@ final class FeatureMapViewController: UIViewController {
         var viewModel: FeatureMapViewModel? {
             switch self {
             case .Populated(let viewModel):
+                return viewModel
+            case .PopulatedAndLoading(_, let viewModel):
                 return viewModel
             default:
                 return nil
@@ -119,7 +124,15 @@ extension FeatureMapViewController {
             }
         }
 
-        dataState = .Loading(task)
+        switch dataState {
+        case .Populated(let viewModel):
+            dataState = .PopulatedAndLoading(task, viewModel)
+        case .PopulatedAndLoading(_, let viewModel):
+            dataState = .PopulatedAndLoading(task, viewModel)
+        case .Empty, .Loading:
+            dataState = .Loading(task)
+        }
+
         task.resume()
     }
 
@@ -151,42 +164,50 @@ extension FeatureMapViewController {
     }
 
     private func resetViewsForDataStateAnimated(animated: Bool) {
-        // Tear down views
-        mapView.removeAnnotations(mapView.annotations)
-
-        // TODO: Hide loading state view, empty state view
-
-        // Reset animation state
-        pauseAnimation()
-        animationTime = 0.0
-
         let message: String?
         let showMessageView: Bool
         let showControls: Bool
+        let resetAnimation: Bool
 
-        // Set up views
         switch dataState {
         case .Empty:
             message = "We didn't find any recent earthquakes here."
             showControls = false
+            resetAnimation = true
         case .Loading:
             message = "Loading…"
             showControls = false
+            resetAnimation = true
         case .Populated(let viewModel):
             message = nil
             showControls = true
+            resetAnimation = true
             timelineView.prepareWithAnimatingFeatures(viewModel.animatingFeatures, animationDuration: viewModel.animationDuration, firstDate: viewModel.firstDate)
+        case .PopulatedAndLoading(_, let viewModel):
+            message = "Loading…"
+            showControls = true
+            resetAnimation = false
         }
 
-        setMessage(message, showingControls: showControls, animated: animated)
+        configureOverlaysWithMessage(message, showingControls: showControls, animated: animated)
 
-        if let animationFeatures = dataState.viewModel?.animatingFeatures {
-            let features = animationFeatures.map { $0.feature }
-            mapView.addAnnotations(features)
+        if resetAnimation {
+            // Tear down annotations
+            mapView.removeAnnotations(mapView.annotations)
+
+            // Reset animation state
+            pauseAnimation()
+            animationTime = 0.0
+
+            // Set up annotations, if any
+            if let animationFeatures = dataState.viewModel?.animatingFeatures {
+                let features = animationFeatures.map { $0.feature }
+                mapView.addAnnotations(features)
+            }
         }
     }
 
-    private func setMessage(message: String?, showingControls showControls: Bool, animated: Bool) {
+    private func configureOverlaysWithMessage(message: String?, showingControls showControls: Bool, animated: Bool) {
         // Show or hide the message view.
         let adjustViews: () -> Void = {
             if let message = message {
@@ -252,7 +273,8 @@ extension FeatureMapViewController {
 
         let displayLink = CADisplayLink(target: self, selector: "advanceAnimation:")
         self.displayLink = displayLink
-        displayLink.addToRunLoop(NSRunLoop.mainRunLoop(), forMode: NSDefaultRunLoopMode) // TODO: Correct run loop mode?
+        // NSRunLoopCommonModes: Also update during map deceleration animation.
+        displayLink.addToRunLoop(NSRunLoop.mainRunLoop(), forMode: NSRunLoopCommonModes)
     }
 
     private func invalidateDisplayLink() {
