@@ -139,6 +139,13 @@ final class FeatureTimelineView: UIView, UIScrollViewDelegate {
         currentAnimationTime = 0.0
     }
 
+    func stopDecelerating() {
+        if collectionView.decelerating {
+            // Interrupt the deceleration animation by starting a new animation to where we already are.
+            collectionView.setContentOffset(collectionView.contentOffset, animated: true)
+        }
+    }
+
     // MARK: UIView
 
     override func intrinsicContentSize() -> CGSize {

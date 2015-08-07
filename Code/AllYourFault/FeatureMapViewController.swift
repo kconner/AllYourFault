@@ -183,6 +183,8 @@ extension FeatureMapViewController {
     }
 
     @IBAction func didTapPlayPauseButton(sender: AnyObject) {
+        timelineView.stopDecelerating()
+
         if let displayLink = displayLink {
             pauseAnimation()
         } else {
