@@ -100,6 +100,10 @@ final class FeatureMapViewController: UIViewController {
         timelineView.currentAnimationTime = animationTime
     }
 
+    override func preferredStatusBarStyle() -> UIStatusBarStyle {
+        return .LightContent
+    }
+
 }
 
 // MARK: Data state
