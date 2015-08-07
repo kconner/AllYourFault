@@ -18,8 +18,9 @@ protocol FeatureTimelineViewDelegate: class {
 
 final class FeatureTimelineView: RoundedCornerView, UIScrollViewDelegate {
 
-    private static let pointsPerAnimationSecond: CGFloat = 120.0
     static let standardHeight: CGFloat = 64.0
+
+    private static let pointsPerAnimationSecond: CGFloat = 120.0
 
     private let collectionView = UICollectionView(frame: CGRectZero, collectionViewLayout: UICollectionViewFlowLayout())
 
@@ -27,7 +28,7 @@ final class FeatureTimelineView: RoundedCornerView, UIScrollViewDelegate {
 
     lazy var dateFormatter: NSDateFormatter = {
         let formatter = NSDateFormatter()
-        // IMPROVE: This doesn't update when the system locale changes, but I think I can live with that for a code test.
+        // IMPROVE: This doesn't update when the system locale changes, but I think I can live with that for a sample app.
         formatter.dateFormat = NSDateFormatter.dateFormatFromTemplate("M/d", options: 0, locale: NSLocale.currentLocale())
         return formatter
     }()

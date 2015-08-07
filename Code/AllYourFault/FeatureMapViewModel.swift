@@ -1,5 +1,5 @@
 //
-//  MapViewModel.swift
+//  FeatureMapViewModel.swift
 //  AllYourFault
 //
 //  Created by Kevin Conner on 8/5/15.

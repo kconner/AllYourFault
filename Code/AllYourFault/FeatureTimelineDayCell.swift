@@ -8,7 +8,7 @@
 
 import UIKit
 
-// A day of time on the FeatureTimelineView.
+// A cell representing one day of time on the FeatureTimelineView.
 
 final class FeatureTimelineDayCell: UICollectionViewCell {
 

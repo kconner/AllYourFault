@@ -112,9 +112,9 @@ final class FeatureMapViewController: UIViewController {
 
 }
 
-// MARK: Data state
-
 extension FeatureMapViewController {
+
+    // MARK: Data state
 
     private func loadDataForMapRegion() {
         // Allow only one update task to run at a time.
@@ -247,9 +247,9 @@ extension FeatureMapViewController {
 
 }
 
-// MARK: Feature Animation
-
 extension FeatureMapViewController {
+
+    // MARK: Feature Animation
 
     var isAnimationAvailable: Bool {
         return dataState.viewModel != nil

@@ -8,6 +8,8 @@
 
 import UIKit
 
+// Colors used in the app.
+
 final class Colors {
 
     // From Solarized. http://ethanschoonover.com/solarized

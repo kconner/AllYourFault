@@ -24,7 +24,7 @@ final class Feature: NSObject, MKAnnotation {
         self.magnitude = magnitude
     }
 
-    static func mapPlistValue(value: PlistValue) -> Feature? {
+    class func mapPlistValue(value: PlistValue) -> Feature? {
         let m = MapPlist.self
         if let dictionary = m.dictionary(value),
             let properties = m.dictionary(dictionary["properties"]),

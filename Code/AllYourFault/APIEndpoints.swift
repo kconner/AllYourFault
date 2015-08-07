@@ -14,18 +14,7 @@ import MapKit
 
 final class APIEndpoints {
 
-    static func allEarthquakesRequest() -> APIRequest<[Feature]> {
-        let url = URLWithPath("http://ehp2-earthquake.wr.usgs.gov/fdsnws/event/1/query",
-            parameters: ["format": "geojson",
-                "jsonerror": "true",
-                "eventtype": "earthquake"])
-
-        return APIRequest<[Feature]>(URL: url,
-            successKey: "features",
-            mapSuccessValue: MapPlist.array(strict: false, mapItem: Feature.mapPlistValue))
-    }
-
-    static func highestMagnitudeEarthquakesRequestWithCoordinateRegion(region: MKCoordinateRegion, limit: Int) -> APIRequest<[Feature]> {
+    class func highestMagnitudeEarthquakesRequestWithCoordinateRegion(region: MKCoordinateRegion, limit: Int) -> APIRequest<[Feature]> {
         let halfSpanLatitude = region.span.latitudeDelta / 2.0
         let halfSpanLongitude = region.span.longitudeDelta / 2.0
 
@@ -47,20 +36,9 @@ final class APIEndpoints {
             mapSuccessValue: MapPlist.array(strict: false, mapItem: Feature.mapPlistValue))
     }
 
-    static func failingRequest() -> APIRequest<[Feature]> {
-        let url = URLWithPath("http://ehp2-earthquake.wr.usgs.gov/fdsnws/event/1/query",
-            parameters: ["format": "geojson",
-                "jsonerror": "true",
-                "starttime": "garbagevalue"])
-
-        return APIRequest<[Feature]>(URL: url,
-            successKey: "features",
-            mapSuccessValue: MapPlist.array(strict: false, mapItem: Feature.mapPlistValue))
-    }
-
     // MARK: Helpers
 
-    private static func URLWithPath(path: String, parameters: [String: String] = [:]) -> NSURL {
+    private class func URLWithPath(path: String, parameters: [String: String] = [:]) -> NSURL {
         let URL: NSURL?
         if parameters.count == 0 {
             URL = NSURL(string: path)

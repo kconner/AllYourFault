@@ -1,5 +1,5 @@
 //
-//  Either.swift
+//  APIResult.swift
 //  AllYourFault
 //
 //  Created by Kevin Conner on 8/4/15.
