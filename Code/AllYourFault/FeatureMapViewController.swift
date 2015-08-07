@@ -76,6 +76,7 @@ final class FeatureMapViewController: UIViewController {
     }
 
     private var displayLink: CADisplayLink?
+    private var lastDisplayLinkTimestamp: NSTimeInterval?
 
     deinit {
         displayLink?.invalidate()
@@ -191,8 +192,6 @@ extension FeatureMapViewController {
             resetFeatureAnimation = false
         }
 
-        configureOverlaysWithMessage(message, showingControls: showControls, animated: animated)
-
         if resetFeatureAnimation {
             // Tear down annotations
             mapView.removeAnnotations(mapView.annotations)
@@ -209,6 +208,8 @@ extension FeatureMapViewController {
                 }
             }
         }
+
+        configureOverlaysWithMessage(message, showingControls: showControls, animated: animated)
     }
 
     private func configureOverlaysWithMessage(message: String?, showingControls showControls: Bool, animated: Bool) {
@@ -275,6 +276,13 @@ extension FeatureMapViewController {
 
         invalidateDisplayLink()
 
+        // If we are at the end of the animation, go to the beginning. Otherwise continue from where we are.
+        if let animationDuration = dataState.viewModel?.animationDuration
+            where animationDuration <= animationTime {
+
+            animationTime = 0.0
+        }
+
         let displayLink = CADisplayLink(target: self, selector: "advanceAnimation:")
         self.displayLink = displayLink
         // NSRunLoopCommonModes: Also update during map deceleration animation.
@@ -284,12 +292,24 @@ extension FeatureMapViewController {
     private func invalidateDisplayLink() {
         displayLink?.invalidate()
         displayLink = nil
+        lastDisplayLinkTimestamp = nil
     }
 
     func advanceAnimation(displayLink: CADisplayLink) {
-        animationTime += displayLink.duration
+        if let lastDisplayLinkTimestamp = lastDisplayLinkTimestamp {
+            animationTime += displayLink.timestamp - lastDisplayLinkTimestamp
 
-        timelineView.currentAnimationTime = animationTime
+            timelineView.currentAnimationTime = animationTime
+        }
+
+        lastDisplayLinkTimestamp = displayLink.timestamp
+
+        // Stop when we reach the total animation duration.
+        if let animationDuration = dataState.viewModel?.animationDuration
+            where animationDuration <= animationTime {
+                
+            pauseAnimation()
+        }
     }
 
     private func moveAnimationToTime(time: NSTimeInterval) {

@@ -53,7 +53,7 @@ final class FeatureTimelineDayCell: UICollectionViewCell {
             featureTimelineDay.dateString.drawAtPoint(CGPointMake(3.0, rect.height - 15.0), withAttributes: FeatureTimelineDayCell.textAttributes)
             
             // Draw dots for each feature.
-            let dotRadius: CGFloat = 1.5
+            let dotRadius: CGFloat = 1.75
             let dotRect = CGRectMake(-dotRadius, -dotRadius, dotRadius * 2.0, dotRadius * 2.0)
             Colors.orangeColor.setFill()
             for animatingFeature in featureTimelineDay.animatingFeatures {

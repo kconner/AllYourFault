@@ -34,8 +34,8 @@ struct FeatureMapViewModel {
         let lastDate = orderedFeatures.last!.date
         let realDateInterval = lastDate.timeIntervalSinceDate(firstDate)
 
-        // Time to animate from the beginning of the first feature animation to after the end of the last one.
-        animationDuration = realDateInterval * FeatureMapViewModel.animationTimePerRealTime + AnimatingFeature.animationDurationMax
+        // Time to animate from the beginning of the first feature animation to the end of the last one.
+        animationDuration = realDateInterval * FeatureMapViewModel.animationTimePerRealTime + 1.5
 
         animatingFeatures = orderedFeatures.map { feature in
             let startTime: NSTimeInterval = feature.date.timeIntervalSinceDate(firstDate) * FeatureMapViewModel.animationTimePerRealTime

@@ -35,8 +35,8 @@ final class APIEndpoints {
                 "eventtype": "earthquake",
                 // This can wrap around the International Date Line,
                 // but that's recommended behavior in this API.
-                "minlatitude": "\(region.center.latitude - halfSpanLatitude)",
-                "maxlatitude": "\(region.center.latitude + halfSpanLatitude)",
+                "minlatitude": "\(max(-90.0, region.center.latitude - halfSpanLatitude))",
+                "maxlatitude": "\(min(90.0, region.center.latitude + halfSpanLatitude))",
                 "minlongitude": "\(region.center.longitude - halfSpanLongitude)",
                 "maxlongitude": "\(region.center.longitude + halfSpanLongitude)",
                 "limit": String(limit),
