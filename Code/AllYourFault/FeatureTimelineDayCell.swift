@@ -14,10 +14,8 @@ final class FeatureTimelineDayCell: UICollectionViewCell {
 
     static let reuseIdentifier = "FeatureTimelineDayCell"
 
-    // TODO: Pick particular colors and organize them in a class
-    private static let blackColor = UIColor(white: 0.0, alpha: 0.4)
     private static let textAttributes: [NSObject: AnyObject] = [
-        NSForegroundColorAttributeName: blackColor,
+        NSForegroundColorAttributeName: Colors.textColor,
         NSFontAttributeName: UIFont.systemFontOfSize(13.0)
     ]
 
@@ -38,8 +36,7 @@ final class FeatureTimelineDayCell: UICollectionViewCell {
     }
 
     private func configureView() {
-        // TODO: Pick particular colors and organize them in a class
-        backgroundColor = UIColor.whiteColor()
+        backgroundColor = Colors.backgroundColor
     }
 
     // MARK: UIView
@@ -48,7 +45,7 @@ final class FeatureTimelineDayCell: UICollectionViewCell {
         let context = UIGraphicsGetCurrentContext()
 
         // Draw hash line at the left edge.
-        FeatureTimelineDayCell.blackColor.setFill()
+        Colors.textColor.setFill()
         CGContextFillRect(context, CGRectMake(0.0, 0.0, 0.5, rect.height))
 
         if let featureTimelineDay = featureTimelineDay {
@@ -58,13 +55,12 @@ final class FeatureTimelineDayCell: UICollectionViewCell {
             // Draw dots for each feature.
             let dotRadius: CGFloat = 1.5
             let dotRect = CGRectMake(-dotRadius, -dotRadius, dotRadius * 2.0, dotRadius * 2.0)
+            Colors.orangeColor.setFill()
             for animatingFeature in featureTimelineDay.animatingFeatures {
                 let xOffset = rect.width * CGFloat((animatingFeature.startTime - featureTimelineDay.animationStartTime) / featureTimelineDay.animationDuration)
                 let yOffset = rect.height * (1.0 - CGFloat(animatingFeature.feature.magnitude / AnimatingFeature.magnitudeMax))
                 let dotFrame = dotRect.rectByOffsetting(dx: xOffset, dy: yOffset)
                 
-                // TODO: Pick particular colors and organize them in a class
-                UIColor.redColor().setFill()
                 CGContextFillEllipseInRect(context, dotFrame)
             }
         }

@@ -56,8 +56,7 @@ final class FeatureTimelineView: RoundedCornerView, UIScrollViewDelegate {
     private func configureView() {
         collectionView.frame = self.bounds
         collectionView.autoresizingMask = .FlexibleWidth | .FlexibleHeight
-        // TODO: Specific colors
-        collectionView.backgroundColor = UIColor.whiteColor()
+        collectionView.backgroundColor = Colors.backgroundColor
         collectionView.showsHorizontalScrollIndicator = false
         collectionView.dataSource = self
         collectionView.delegate = self
@@ -73,8 +72,7 @@ final class FeatureTimelineView: RoundedCornerView, UIScrollViewDelegate {
 
         let dividerView = UIView(frame: CGRectMake(self.bounds.midX, 0.0, 1.0, self.bounds.height))
         dividerView.autoresizingMask = .FlexibleLeftMargin | .FlexibleRightMargin | .FlexibleHeight
-        // TODO: Specific colors
-        dividerView.backgroundColor = UIColor.redColor()
+        dividerView.backgroundColor = Colors.orangeColor
         dividerView.userInteractionEnabled = false
         addSubview(dividerView)
     }

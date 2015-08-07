@@ -18,7 +18,7 @@ import MapKit
 final class FeatureMapViewController: UIViewController {
 
     private enum DataState {
-        case Empty
+        case Empty(String?)
         case Loading(NSURLSessionTask)
         case Populated(FeatureMapViewModel)
         case PopulatedAndLoading(NSURLSessionTask, FeatureMapViewModel)
@@ -47,6 +47,7 @@ final class FeatureMapViewController: UIViewController {
     }
 
     private static let messageViewVerticalMargin: CGFloat = 8.0
+    private static let messageViewOutsetWhenHidden: CGFloat = 16.0
     private static let controlsVerticalMargin: CGFloat = 16.0
     private static let controlsOutsetWhenHidden: CGFloat = 32.0
 
@@ -60,7 +61,7 @@ final class FeatureMapViewController: UIViewController {
 
     private var lastMapRegion: MKCoordinateRegion!
 
-    private var dataState = DataState.Empty {
+    private var dataState: DataState = .Empty(nil) {
         didSet {
             resetViewsForDataStateAnimated(true)
         }
@@ -87,6 +88,10 @@ final class FeatureMapViewController: UIViewController {
 
         lastMapRegion = mapView.region
         mapView.delegate = self
+
+        messageView.backgroundColor = Colors.backgroundColor
+        messageLabel.backgroundColor = Colors.backgroundColor
+        messageLabel.textColor = Colors.textColor
 
         timelineView.featureTimelineViewDelegate = self
 
@@ -153,60 +158,55 @@ extension FeatureMapViewController {
                 let viewModel = FeatureMapViewModel(features: features.unbox)
                 dataState = .Populated(viewModel)
             } else {
-                dataState = .Empty
+                dataState = .Empty("We didn't find any recent earthquakes here.")
             }
         case .Failure(let error):
-            dataState = .Empty
-            presentAPIError(error.unbox)
+            dataState = .Empty("\(error.unbox.title): \(error.unbox.message)")
         }
-    }
-
-    private func presentAPIError(error: APIError) {
-        let alertController = UIAlertController(title: error.title, message: error.message, preferredStyle: .Alert)
-        alertController.addAction(UIAlertAction(title: "Dismiss", style: .Default, handler: nil))
-        presentViewController(alertController, animated: true, completion: nil)
     }
 
     private func resetViewsForDataStateAnimated(animated: Bool) {
         let message: String?
         let showMessageView: Bool
         let showControls: Bool
-        let resetAnimation: Bool
+        let resetFeatureAnimation: Bool
 
         switch dataState {
-        case .Empty:
-            message = "We didn't find any recent earthquakes here."
+        case .Empty(let emptyMessage):
+            message = emptyMessage
             showControls = false
-            resetAnimation = true
+            resetFeatureAnimation = true
         case .Loading:
             message = "Loading…"
             showControls = false
-            resetAnimation = true
+            resetFeatureAnimation = true
         case .Populated(let viewModel):
             message = nil
             showControls = true
-            resetAnimation = true
+            resetFeatureAnimation = true
             timelineView.prepareWithAnimatingFeatures(viewModel.animatingFeatures, animationDuration: viewModel.animationDuration, firstDate: viewModel.firstDate)
         case .PopulatedAndLoading(_, let viewModel):
             message = "Loading…"
             showControls = true
-            resetAnimation = false
+            resetFeatureAnimation = false
         }
 
         configureOverlaysWithMessage(message, showingControls: showControls, animated: animated)
 
-        if resetAnimation {
+        if resetFeatureAnimation {
             // Tear down annotations
             mapView.removeAnnotations(mapView.annotations)
 
-            // Reset animation state
-            pauseAnimation()
-            animationTime = 0.0
-
-            // Set up annotations, if any
-            if let animationFeatures = dataState.viewModel?.animatingFeatures {
-                let features = animationFeatures.map { $0.feature }
-                mapView.addAnnotations(features)
+            if let viewModel = dataState.viewModel {
+                // Reset animation state
+                pauseAnimation()
+                animationTime = 0.0
+                
+                // Set up annotations, if any
+                if let animationFeatures = dataState.viewModel?.animatingFeatures {
+                    let features = animationFeatures.map { $0.feature }
+                    mapView.addAnnotations(features)
+                }
             }
         }
     }
@@ -219,7 +219,7 @@ extension FeatureMapViewController {
                 self.messageViewTopConstraint.constant = FeatureMapViewController.messageViewVerticalMargin
                 self.messageView.alpha = 1.0
             } else {
-                self.messageViewTopConstraint.constant = FeatureMapViewController.messageViewVerticalMargin - FeatureMapViewController.controlsOutsetWhenHidden
+                self.messageViewTopConstraint.constant = FeatureMapViewController.messageViewVerticalMargin - FeatureMapViewController.messageViewOutsetWhenHidden
                 self.messageView.alpha = 0.0
             }
 

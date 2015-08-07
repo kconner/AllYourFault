@@ -176,7 +176,7 @@ Using the API provided by the [USGS Earthquake Hazards Program](http://ehp2-eart
         - Loading message and empty message
         - Show and hide controls and loading / empty message
         - Style adjustments
-        - Hard part is over; add cool stuff as needed
+        - Simultaneous animation and loading
         - Keep annotations visible and animation playing while new data loads
         - Show and hide controls with animation availability, rather than disabling them
         - App icon
