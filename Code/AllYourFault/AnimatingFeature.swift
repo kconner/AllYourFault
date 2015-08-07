@@ -38,7 +38,7 @@ struct AnimatingFeature {
         self.startTime = startTime
 
         // Rather than representing a powers-of-ten scale, just express some exaggeration with magnitude.
-        let base = 1.25
+        let base = 1.3
         severity = pow(base, feature.magnitude) / pow(base, AnimatingFeature.magnitudeMax)
     }
 
