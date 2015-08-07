@@ -120,7 +120,7 @@ extension FeatureMapViewController {
         // Allow only one update task to run at a time.
         dataState.currentUpdateTask?.cancel()
 
-        let request = APIEndpoints.highestMagnitudeEarthquakesRequestWithCoordinateRegion(coordinateRegionForQuery, limit: 200)
+        let request = APIEndpoints.highestMagnitudeEarthquakesRequestWithCoordinateRegion(coordinateRegionForQuery, limit: 100)
         var task: NSURLSessionTask! = nil
         task = request.taskWithSession(NSURLSession.sharedSession()) { [weak self] result -> Void in
             // I'd like to have a mechanism to cancel this task after the response is received but before result preparation ends.

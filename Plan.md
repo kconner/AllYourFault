@@ -181,6 +181,6 @@ Using the API provided by the [USGS Earthquake Hazards Program](http://ehp2-eart
         - Loose ends
             - Timeline padding with extra days
             - Stop animation at total duration
-        - App icon
         - Launch screen
+        - App icon
         - Memory, performance, battery, GPS usage testing
