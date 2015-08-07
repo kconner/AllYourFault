@@ -178,7 +178,9 @@ Using the API provided by the [USGS Earthquake Hazards Program](http://ehp2-eart
         - Keep annotations visible and animation playing while new data loads
         - Style adjustments
         - Ripple image
+        - Loose ends
+            - Timeline padding with extra days
+            - Stop animation at total duration
         - App icon
         - Launch screen
         - Memory, performance, battery, GPS usage testing
-        - Unit tests for real, time permitting

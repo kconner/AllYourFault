@@ -132,6 +132,14 @@ final class FeatureTimelineView: RoundedCornerView, UIScrollViewDelegate {
         // Save the last day too.
         saveDayWithEndIndex(animatingFeatures.count)
 
+        // Add an empty day, so we can have a terminating vertical line.
+        // Set the duration so the cell will be just one point wide.
+        let onePointDuration = 1.0 / NSTimeInterval(FeatureTimelineView.pointsPerAnimationSecond)
+        days.append(FeatureTimelineDay(animatingFeatures: animatingFeatures[dayStartIndex..<dayStartIndex],
+            dateString: "",
+            animationStartTime: dayAnimationStartTime,
+            animationDuration: onePointDuration))
+
         self.days = days
         animationPointOffsetInFirstDay = round(CGFloat(animationTimeOffset) * FeatureTimelineView.pointsPerAnimationSecond)
 
@@ -141,7 +149,7 @@ final class FeatureTimelineView: RoundedCornerView, UIScrollViewDelegate {
 
     func stopDecelerating() {
         if collectionView.decelerating {
-            // Interrupt the deceleration animation by starting a new animation to where we already are.
+            // Interrupt the deceleration animation by starting a new animation to the offset where we already are.
             collectionView.setContentOffset(collectionView.contentOffset, animated: true)
         }
     }
@@ -150,6 +158,13 @@ final class FeatureTimelineView: RoundedCornerView, UIScrollViewDelegate {
 
     override func intrinsicContentSize() -> CGSize {
         return CGSizeMake(0.0, FeatureTimelineView.standardHeight)
+    }
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+
+        // Inset half the width at the beginning and end of the scroll view, so we can always scroll cells across the center line.
+        collectionView.contentInset = UIEdgeInsetsMake(0.0, bounds.midX, 0.0, bounds.midX - 1.0)
     }
 
 }
@@ -173,6 +188,7 @@ extension FeatureTimelineView: UICollectionViewDataSource, UICollectionViewDeleg
 
         if let dayCell = cell as? FeatureTimelineDayCell,
             let day = dayAtIndexPath(indexPath) {
+
             dayCell.featureTimelineDay = day
         }
 
@@ -181,8 +197,7 @@ extension FeatureTimelineView: UICollectionViewDataSource, UICollectionViewDeleg
 
     func collectionView(collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAtIndexPath indexPath: NSIndexPath) -> CGSize {
         if let day = dayAtIndexPath(indexPath) {
-            return CGSizeMake(round(CGFloat(day.animationDuration) * FeatureTimelineView.pointsPerAnimationSecond),
-                FeatureTimelineView.standardHeight)
+            return CGSizeMake(round(CGFloat(day.animationDuration) * FeatureTimelineView.pointsPerAnimationSecond), FeatureTimelineView.standardHeight)
         } else {
             return CGSizeZero
         }
