@@ -27,7 +27,7 @@ final class FeatureTimelineView: RoundedCornerView, UIScrollViewDelegate {
 
     lazy var dateFormatter: NSDateFormatter = {
         let formatter = NSDateFormatter()
-        // TODO: This doesn't update when the system locale changes, but I think I can live with that for a code test.
+        // IMPROVE: This doesn't update when the system locale changes, but I think I can live with that for a code test.
         formatter.dateFormat = NSDateFormatter.dateFormatFromTemplate("M/d", options: 0, locale: NSLocale.currentLocale())
         return formatter
     }()
@@ -88,7 +88,6 @@ final class FeatureTimelineView: RoundedCornerView, UIScrollViewDelegate {
         // Divide features into segments by day.
         var days: [FeatureTimelineDay] = []
 
-        // TODO: Test with non-gregorian calendars.
         let calendar = NSCalendar.currentCalendar()
         let oneDayComponents = NSDateComponents()
         oneDayComponents.day = 1

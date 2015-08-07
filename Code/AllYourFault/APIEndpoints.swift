@@ -22,7 +22,7 @@ final class APIEndpoints {
 
         return APIRequest<[Feature]>(URL: url,
             successKey: "features",
-            mapSuccessValue: MapPlist.array(Feature.mapPlistValue))
+            mapSuccessValue: MapPlist.array(strict: false, mapItem: Feature.mapPlistValue))
     }
 
     static func highestMagnitudeEarthquakesRequestWithCoordinateRegion(region: MKCoordinateRegion, limit: Int) -> APIRequest<[Feature]> {
@@ -44,7 +44,7 @@ final class APIEndpoints {
 
         return APIRequest<[Feature]>(URL: url,
             successKey: "features",
-            mapSuccessValue: MapPlist.array(Feature.mapPlistValue))
+            mapSuccessValue: MapPlist.array(strict: false, mapItem: Feature.mapPlistValue))
     }
 
     static func failingRequest() -> APIRequest<[Feature]> {
@@ -55,7 +55,7 @@ final class APIEndpoints {
 
         return APIRequest<[Feature]>(URL: url,
             successKey: "features",
-            mapSuccessValue: MapPlist.array(Feature.mapPlistValue))
+            mapSuccessValue: MapPlist.array(strict: false, mapItem: Feature.mapPlistValue))
     }
 
     // MARK: Helpers

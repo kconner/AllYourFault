@@ -57,7 +57,9 @@ final class FeatureTimelineDayCell: UICollectionViewCell {
             let dotRect = CGRectMake(-dotRadius, -dotRadius, dotRadius * 2.0, dotRadius * 2.0)
             Colors.orangeColor.setFill()
             for animatingFeature in featureTimelineDay.animatingFeatures {
-                let xOffset = rect.width * CGFloat((animatingFeature.startTime - featureTimelineDay.animationStartTime) / featureTimelineDay.animationDuration)
+                let xPosition = rect.width * CGFloat((animatingFeature.startTime - featureTimelineDay.animationStartTime) / featureTimelineDay.animationDuration)
+                // If a dot would end up being cut off by the cell boundary, scoot it in a pixel or two.
+                let xOffset = max(dotRadius, min(rect.width - dotRadius, xPosition))
                 let yOffset = rect.height * (1.0 - CGFloat(animatingFeature.feature.magnitude / AnimatingFeature.magnitudeMax))
                 let dotFrame = dotRect.rectByOffsetting(dx: xOffset, dy: yOffset)
                 

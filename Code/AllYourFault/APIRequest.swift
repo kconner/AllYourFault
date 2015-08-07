@@ -57,7 +57,7 @@ struct APIRequest<T> {
 
                     // Return on the main thread.
                     dispatch_async(dispatch_get_main_queue()) {
-                        // TODO: I'd like to have a mechanism to cancel this task after the completion block begins but before response preparation ends.
+                        // IMPROVE: I'd like to have a mechanism to cancel this task after the completion block begins but before response preparation ends.
                         completion(result)
                     }
                 }

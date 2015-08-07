@@ -17,10 +17,6 @@ final class Feature: NSObject, MKAnnotation {
     let coordinate: CLLocationCoordinate2D // geometry.coordinates[0..<2]
     let magnitude: Double // properties.mag
 
-    // TODO: assert that
-    // properties.type == "earthquake"
-    // geometry.type == "Point"
-
     init(identifier: String, date: NSDate, coordinate: CLLocationCoordinate2D, magnitude: Double) {
         self.identifier = identifier
         self.date = date
