@@ -35,7 +35,7 @@ struct APIRequest<T> {
     private let successKey: String
     private let mapSuccessValue: PlistValue -> SuccessType?
 
-    init(URL: NSURL, successKey: String, mapSuccessValue: PlistValue -> T?) {
+    init(URL: NSURL, successKey: String, mapSuccessValue: PlistValue -> SuccessType?) {
         self.URL = URL
         self.successKey = successKey
         self.mapSuccessValue = mapSuccessValue
