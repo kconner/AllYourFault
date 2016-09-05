@@ -12,12 +12,12 @@ import MapKit
 
 final class FeatureAnnotationView: MKAnnotationView {
 
-    private let rippleLayer = CALayer()
+    fileprivate let rippleLayer = CALayer()
 
     var finalScale: CGFloat = 0.0
 
     // Animation runs from 0.0 to 1.0.
-    var animationInterpolant: NSTimeInterval = 0.0 {
+    var animationInterpolant: TimeInterval = 0.0 {
         didSet {
             if animationInterpolant != oldValue {
                 moveAnimationToInterpolant(animationInterpolant, fromInterpolant: oldValue)
@@ -25,19 +25,17 @@ final class FeatureAnnotationView: MKAnnotationView {
         }
     }
 
-    // init(frame:) is called by init(annotation:reuseIdentifier:).
-    // We must implement both, so may as well do setup here.
-    override init(frame: CGRect) {
-        super.init(frame: frame)
+    override init(annotation: MKAnnotation?, reuseIdentifier: String?) {
+        super.init(annotation: annotation, reuseIdentifier: reuseIdentifier)
 
         image = UIImage(named: "annotation")
         let imageSize = image?.size ?? .zero
 
         if let rippleImage = UIImage(named: "ripple") {
-            rippleLayer.contents = rippleImage.CGImage
-            rippleLayer.bounds = CGRect(origin: CGPointZero, size: rippleImage.size)
-            rippleLayer.position = CGPointMake(imageSize.width / 2.0, imageSize.height / 2.0)
-            rippleLayer.anchorPoint = CGPointMake(0.5, 0.5)
+            rippleLayer.contents = rippleImage.cgImage
+            rippleLayer.bounds = CGRect(origin: CGPoint.zero, size: rippleImage.size)
+            rippleLayer.position = CGPoint(x: imageSize.width / 2.0, y: imageSize.height / 2.0)
+            rippleLayer.anchorPoint = CGPoint(x: 0.5, y: 0.5)
         } else {
             assertionFailure("Ripple image did not exist.")
         }
@@ -49,17 +47,13 @@ final class FeatureAnnotationView: MKAnnotationView {
         layer.addSublayer(rippleLayer)
     }
 
-    override init(annotation: MKAnnotation?, reuseIdentifier: String?) {
-        super.init(annotation: annotation, reuseIdentifier: reuseIdentifier)
-    }
-
     required init?(coder aDecoder: NSCoder) {
         preconditionFailure("Initializing FeatureAnnotationView with an NSCoder is not supported.")
     }
 
     // MARK: Helpers
 
-    private func moveAnimationToInterpolant(interpolant: NSTimeInterval, fromInterpolant: NSTimeInterval) {
+    fileprivate func moveAnimationToInterpolant(_ interpolant: TimeInterval, fromInterpolant: TimeInterval) {
         let maxOpacity: Float = 1.0
 
         let rippleScale: CGFloat

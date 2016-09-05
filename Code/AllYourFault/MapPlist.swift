@@ -17,22 +17,22 @@ typealias PlistValue = AnyObject?
 
 final class MapPlist {
 
-    class func int(value: PlistValue) -> Int? {
+    class func int(_ value: PlistValue) -> Int? {
         return value as? Int
     }
 
-    class func double(value: PlistValue) -> Double? {
+    class func double(_ value: PlistValue) -> Double? {
         return value as? Double
     }
 
-    class func string(value: PlistValue) -> String? {
+    class func string(_ value: PlistValue) -> String? {
         return value as? String
     }
 
     // Expects a double representing a Unix Epoch date.
-    class func dateWithUnixTime(value: PlistValue) -> NSDate? {
+    class func dateWithUnixTime(_ value: PlistValue) -> Date? {
         if let milliseconds = MapPlist.double(value) {
-            return NSDate(timeIntervalSince1970: NSTimeInterval(milliseconds) / 1000.0)
+            return Date(timeIntervalSince1970: TimeInterval(milliseconds) / 1000.0)
         } else {
             return nil
         }
@@ -40,28 +40,28 @@ final class MapPlist {
 
     // Expects an array of doubles representing longitude, latitude, _.
     // Should we return the coordinate and depth as a tuple?
-    class func coordinate2DWithPoint(value: PlistValue) -> CLLocationCoordinate2D? {
-        if let array = MapPlist.array(mapItem: MapPlist.double)(value) where array.count == 3 {
+    class func coordinate2DWithPoint(_ value: PlistValue) -> CLLocationCoordinate2D? {
+        if let array = MapPlist.array(mapItem: MapPlist.double)(value) , array.count == 3 {
             return CLLocationCoordinate2D(latitude: array[1], longitude: array[0])
         } else {
             return nil
         }
     }
 
-    class func dictionary(value: PlistValue) -> NSDictionary? {
+    class func dictionary(_ value: PlistValue) -> NSDictionary? {
         return value as? NSDictionary
     }
 
     // This function is curried so as to produce a mapping function for a given item type.
     // mapItem is used to map each item of the array.
     // When strict, if any item fails to map, the whole array will fail. Otherwise failed items are omitted.
-    class func array<T>(strict: Bool = true, mapItem: PlistValue -> T?) -> (PlistValue) -> [T]? {
+    class func array<T>(_ strict: Bool = true, mapItem: @escaping (PlistValue) -> T?) -> (PlistValue) -> [T]? {
         return { value in
             if let array = value as? NSArray {
                 var result: [T] = []
 
                 for item in array {
-                    if let mappedItem = mapItem(item) {
+                    if let mappedItem = mapItem(item as PlistValue) {
                         result.append(mappedItem)
                     } else if strict {
                         return nil

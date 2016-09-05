@@ -18,12 +18,12 @@ struct APIError {
     let title: String // title
     let message: String // error
 
-    static func mapPlistValue(value: PlistValue) -> APIError? {
+    static func mapPlistValue(_ value: PlistValue) -> APIError? {
         let m = MapPlist.self
         if let dictionary = m.dictionary(value),
-            let statusCode = m.int(dictionary["status"]),
-            let title = m.string(dictionary["title"]),
-            let message = m.string(dictionary["error"]) {
+            let statusCode = m.int(dictionary["status"] as PlistValue),
+            let title = m.string(dictionary["title"] as PlistValue),
+            let message = m.string(dictionary["error"] as PlistValue) {
 
             return APIError(statusCode: statusCode, title: title, message: message)
         } else {

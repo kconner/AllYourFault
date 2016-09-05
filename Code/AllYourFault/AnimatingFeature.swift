@@ -16,16 +16,16 @@ struct AnimatingFeature {
     static let magnitudeMax: Double = 9.0
 
     // Duration of a ripple animation at max magnitude.
-    static let animationDurationMax: NSTimeInterval = 3.0
+    static let animationDurationMax: TimeInterval = 3.0
 
     // Final scale of a ripple animation at max magnitude.
     static let animationScaleMax: CGFloat = 1.0
 
     let feature: Feature
-    let startTime: NSTimeInterval
+    let startTime: TimeInterval
     let severity: Double
 
-    var duration: NSTimeInterval {
+    var duration: TimeInterval {
         return severity * AnimatingFeature.animationDurationMax
     }
 
@@ -33,7 +33,7 @@ struct AnimatingFeature {
         return CGFloat(severity) * AnimatingFeature.animationScaleMax
     }
 
-    init(feature: Feature, startTime: NSTimeInterval) {
+    init(feature: Feature, startTime: TimeInterval) {
         self.feature = feature
         self.startTime = startTime
 

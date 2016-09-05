@@ -12,7 +12,7 @@ import UIKit
 
 protocol FeatureTimelineViewDelegate: class {
 
-    func featureTimelineView(featureTimelineView: FeatureTimelineView, didScrubToTime time: NSTimeInterval)
+    func featureTimelineView(_ featureTimelineView: FeatureTimelineView, didScrubToTime time: TimeInterval)
 
 }
 
@@ -20,34 +20,34 @@ final class FeatureTimelineView: RoundedCornerView, UIScrollViewDelegate {
 
     static let standardHeight: CGFloat = 64.0
 
-    private static let pointsPerAnimationSecond: CGFloat = 120.0
+    fileprivate static let pointsPerAnimationSecond: CGFloat = 120.0
 
-    private let collectionView = UICollectionView(frame: CGRectZero, collectionViewLayout: UICollectionViewFlowLayout())
+    fileprivate let collectionView = UICollectionView(frame: CGRect.zero, collectionViewLayout: UICollectionViewFlowLayout())
 
     weak var featureTimelineViewDelegate: FeatureTimelineViewDelegate?
 
-    lazy var dateFormatter: NSDateFormatter = {
-        let formatter = NSDateFormatter()
+    lazy var dateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
         // IMPROVE: This doesn't update when the system locale changes, but I think I can live with that for a sample app.
-        formatter.dateFormat = NSDateFormatter.dateFormatFromTemplate("M/d", options: 0, locale: NSLocale.currentLocale())
+        formatter.dateFormat = DateFormatter.dateFormat(fromTemplate: "M/d", options: 0, locale: NSLocale.current)
         return formatter
     }()
 
-    var currentAnimationTime: NSTimeInterval {
+    var currentAnimationTime: TimeInterval {
         get {
-            return NSTimeInterval((collectionView.contentOffset.x - animationPointOffset) / FeatureTimelineView.pointsPerAnimationSecond)
+            return TimeInterval((collectionView.contentOffset.x - animationPointOffset) / FeatureTimelineView.pointsPerAnimationSecond)
         }
         set {
-            collectionView.contentOffset = CGPointMake(animationPointOffset + round(CGFloat(newValue) * FeatureTimelineView.pointsPerAnimationSecond), 0.0)
+            collectionView.contentOffset = CGPoint(x: animationPointOffset + round(CGFloat(newValue) * FeatureTimelineView.pointsPerAnimationSecond), y: 0.0)
         }
     }
 
-    private var days: [FeatureTimelineDay] = []
+    fileprivate var days: [FeatureTimelineDay] = []
 
     // The whole animation begins sometime during the first day, not at the beginning of the first day.
-    private var animationPointOffsetInFirstDay: CGFloat = 0.0
+    fileprivate var animationPointOffsetInFirstDay: CGFloat = 0.0
     // A given feature should animate when its dot reaches the center line.
-    private var animationPointOffset: CGFloat {
+    fileprivate var animationPointOffset: CGFloat {
         return animationPointOffsetInFirstDay - bounds.midX
     }
 
@@ -61,54 +61,54 @@ final class FeatureTimelineView: RoundedCornerView, UIScrollViewDelegate {
         configureView()
     }
 
-    private func configureView() {
+    fileprivate func configureView() {
         collectionView.frame = self.bounds
-        collectionView.autoresizingMask = [.FlexibleWidth, .FlexibleHeight]
+        collectionView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         collectionView.backgroundColor = Colors.backgroundColor
         collectionView.showsHorizontalScrollIndicator = false
         collectionView.dataSource = self
         collectionView.delegate = self
-        collectionView.registerClass(FeatureTimelineDayCell.self, forCellWithReuseIdentifier: FeatureTimelineDayCell.reuseIdentifier)
+        collectionView.register(FeatureTimelineDayCell.self, forCellWithReuseIdentifier: FeatureTimelineDayCell.reuseIdentifier)
 
         let flowLayout = collectionView.collectionViewLayout as! UICollectionViewFlowLayout
-        flowLayout.scrollDirection = .Horizontal
+        flowLayout.scrollDirection = .horizontal
         flowLayout.minimumLineSpacing = 0.0
         flowLayout.minimumInteritemSpacing = 0.0
-        flowLayout.sectionInset = UIEdgeInsetsZero
+        flowLayout.sectionInset = .zero
 
         addSubview(collectionView)
 
-        let dividerView = UIView(frame: CGRectMake(self.bounds.midX, 0.0, 1.0, self.bounds.height))
-        dividerView.autoresizingMask = [.FlexibleLeftMargin, .FlexibleRightMargin, .FlexibleHeight]
+        let dividerView = UIView(frame: CGRect(x: self.bounds.midX, y: 0.0, width: 1.0, height: self.bounds.height))
+        dividerView.autoresizingMask = [.flexibleLeftMargin, .flexibleRightMargin, .flexibleHeight]
         dividerView.backgroundColor = Colors.orangeColor
-        dividerView.userInteractionEnabled = false
+        dividerView.isUserInteractionEnabled = false
         addSubview(dividerView)
     }
 
-    func prepareWithAnimatingFeatures(animatingFeatures: [AnimatingFeature], animationDuration: NSTimeInterval, firstDate: NSDate) {
+    func prepareWithAnimatingFeatures(_ animatingFeatures: [AnimatingFeature], animationDuration: TimeInterval, firstDate: Date) {
         // Divide features into segments by day.
         var days: [FeatureTimelineDay] = []
 
-        let calendar = NSCalendar.currentCalendar()
-        let oneDayComponents = NSDateComponents()
+        let calendar = NSCalendar.current
+        var oneDayComponents = DateComponents()
         oneDayComponents.day = 1
 
         // Get parameters for the first day in the timeline.
-        let dayDateComponents = calendar.components([.Year, .Month, .Day], fromDate: firstDate)
-        let firstDayStartDate: NSDate! = calendar.dateFromComponents(dayDateComponents)
+        let dayDateComponents = calendar.dateComponents([.year, .month, .day], from: firstDate)
+        let firstDayStartDate: Date! = calendar.date(from: dayDateComponents)
         // When during the first day does the overall animation begin?
-        let animationTimeOffset = firstDate.timeIntervalSinceDate(firstDayStartDate) * FeatureMapViewModel.animationTimePerRealTime
+        let animationTimeOffset = firstDate.timeIntervalSince(firstDayStartDate) * FeatureMapViewModel.animationTimePerRealTime
 
         var dayStartDate = firstDayStartDate
-        var dayEndDate: NSDate! = calendar.dateByAddingComponents(oneDayComponents, toDate: dayStartDate, options: [])
+        var dayEndDate: Date! = (calendar as NSCalendar).date(byAdding: oneDayComponents, to: dayStartDate!, options: [])
         var dayStartIndex = 0
         var dayAnimationStartTime = -animationTimeOffset
 
-        let saveDayWithEndIndex: Int -> Void = { dayEndIndex in
+        let saveDayWithEndIndex: (Int) -> Void = { dayEndIndex in
             // Save the day's view model.
             let dayFeatures = animatingFeatures[dayStartIndex..<dayEndIndex]
-            let dateString = self.dateFormatter.stringFromDate(dayStartDate)
-            let animationDuration = dayEndDate.timeIntervalSinceDate(dayStartDate) * FeatureMapViewModel.animationTimePerRealTime
+            let dateString = self.dateFormatter.string(from: dayStartDate!)
+            let animationDuration = dayEndDate.timeIntervalSince(dayStartDate!) * FeatureMapViewModel.animationTimePerRealTime
             days.append(FeatureTimelineDay(animatingFeatures: dayFeatures,
                 dateString: dateString,
                 animationStartTime: dayAnimationStartTime,
@@ -116,15 +116,15 @@ final class FeatureTimelineView: RoundedCornerView, UIScrollViewDelegate {
 
             // Advance parameters to the next day.
             dayStartDate = dayEndDate
-            dayEndDate = calendar.dateByAddingComponents(oneDayComponents, toDate: dayStartDate, options: [])
+            dayEndDate = (calendar as NSCalendar).date(byAdding: oneDayComponents, to: dayStartDate!, options: [])
             dayStartIndex = dayEndIndex
             dayAnimationStartTime += animationDuration
         }
 
         // Features are ordered by date, and we are configured for the first day.
         // Find the end index for each day by walking through all the features.
-        for (index, animatingFeature) in animatingFeatures.enumerate() {
-            while animatingFeature.feature.date.compare(dayEndDate) != .OrderedAscending {
+        for (index, animatingFeature) in animatingFeatures.enumerated() {
+            while animatingFeature.feature.date.compare(dayEndDate) != .orderedAscending {
                 saveDayWithEndIndex(index)
             }
         }
@@ -134,7 +134,7 @@ final class FeatureTimelineView: RoundedCornerView, UIScrollViewDelegate {
 
         // Add an empty day, so we can have a terminating vertical line.
         // Set the duration so the cell will be just one point wide.
-        let onePointDuration = 1.0 / NSTimeInterval(FeatureTimelineView.pointsPerAnimationSecond)
+        let onePointDuration = 1.0 / TimeInterval(FeatureTimelineView.pointsPerAnimationSecond)
         days.append(FeatureTimelineDay(animatingFeatures: animatingFeatures[dayStartIndex..<dayStartIndex],
             dateString: "",
             animationStartTime: dayAnimationStartTime,
@@ -148,7 +148,7 @@ final class FeatureTimelineView: RoundedCornerView, UIScrollViewDelegate {
     }
 
     func stopDecelerating() {
-        if collectionView.decelerating {
+        if collectionView.isDecelerating {
             // Interrupt the deceleration animation by starting a new animation to the offset where we already are.
             collectionView.setContentOffset(collectionView.contentOffset, animated: true)
         }
@@ -156,8 +156,8 @@ final class FeatureTimelineView: RoundedCornerView, UIScrollViewDelegate {
 
     // MARK: UIView
 
-    override func intrinsicContentSize() -> CGSize {
-        return CGSizeMake(0.0, FeatureTimelineView.standardHeight)
+    override var intrinsicContentSize: CGSize {
+        return CGSize(width: 0.0, height: FeatureTimelineView.standardHeight)
     }
 
     override func layoutSubviews() {
@@ -171,20 +171,20 @@ final class FeatureTimelineView: RoundedCornerView, UIScrollViewDelegate {
 
 extension FeatureTimelineView: UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
 
-    private func dayAtIndexPath(indexPath: NSIndexPath) -> FeatureTimelineDay? {
-        if days.indices ~= indexPath.row {
-            return days[indexPath.row]
+    fileprivate func dayAtIndexPath(_ indexPath: IndexPath) -> FeatureTimelineDay? {
+        if days.indices ~= (indexPath as NSIndexPath).row {
+            return days[(indexPath as NSIndexPath).row]
         } else {
             return nil
         }
     }
 
-    func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return days.count
     }
 
-    func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCellWithReuseIdentifier(FeatureTimelineDayCell.reuseIdentifier, forIndexPath: indexPath) 
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: FeatureTimelineDayCell.reuseIdentifier, for: indexPath) 
 
         if let dayCell = cell as? FeatureTimelineDayCell,
             let day = dayAtIndexPath(indexPath) {
@@ -195,19 +195,19 @@ extension FeatureTimelineView: UICollectionViewDataSource, UICollectionViewDeleg
         return cell
     }
 
-    func collectionView(collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAtIndexPath indexPath: NSIndexPath) -> CGSize {
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         if let day = dayAtIndexPath(indexPath) {
-            return CGSizeMake(round(CGFloat(day.animationDuration) * FeatureTimelineView.pointsPerAnimationSecond), FeatureTimelineView.standardHeight)
+            return CGSize(width: round(CGFloat(day.animationDuration) * FeatureTimelineView.pointsPerAnimationSecond), height: FeatureTimelineView.standardHeight)
         } else {
-            return CGSizeZero
+            return CGSize.zero
         }
     }
 
     // MARK: UIScrollViewDelegate
 
-    func scrollViewDidScroll(scrollView: UIScrollView) {
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
         // Only report scrolling done by the user.
-        if scrollView.tracking || scrollView.decelerating {
+        if scrollView.isTracking || scrollView.isDecelerating {
             featureTimelineViewDelegate?.featureTimelineView(self, didScrubToTime: currentAnimationTime)
         }
     }

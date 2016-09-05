@@ -14,11 +14,11 @@ import MapKit
 
 final class APIEndpoints {
 
-    class func highestMagnitudeEarthquakesRequestWithCoordinateRegion(region: MKCoordinateRegion, limit: Int) -> APIRequest<[Feature]> {
+    class func highestMagnitudeEarthquakesRequestWithCoordinateRegion(_ region: MKCoordinateRegion, limit: Int) -> APIRequest<[Feature]> {
         let halfSpanLatitude = region.span.latitudeDelta / 2.0
         let halfSpanLongitude = region.span.longitudeDelta / 2.0
 
-        let url = URLWithPath("http://ehp2-earthquake.wr.usgs.gov/fdsnws/event/1/query",
+        let url = urlWithPath("http://ehp2-earthquake.wr.usgs.gov/fdsnws/event/1/query",
             parameters: ["format": "geojson",
                 "jsonerror": "true",
                 "eventtype": "earthquake",
@@ -31,27 +31,27 @@ final class APIEndpoints {
                 "limit": String(limit),
                 "orderby": "magnitude"])
 
-        return APIRequest<[Feature]>(URL: url,
+        return APIRequest<[Feature]>(url: url,
             successKey: "features",
             mapSuccessValue: MapPlist.array(false, mapItem: Feature.mapPlistValue))
     }
 
     // MARK: Helpers
 
-    private class func URLWithPath(path: String, parameters: [String: String] = [:]) -> NSURL {
-        let URL: NSURL?
+    fileprivate class func urlWithPath(_ path: String, parameters: [String: String] = [:]) -> URL {
+        let URL: Foundation.URL?
         if parameters.count == 0 {
-            URL = NSURL(string: path)
+            URL = Foundation.URL(string: path)
         } else {
             let queryItems = parameters.map { (key, value) -> String in
-                if let escapedValue = value.stringByAddingPercentEncodingWithAllowedCharacters(NSCharacterSet.URLHostAllowedCharacterSet()) {
+                if let escapedValue = value.addingPercentEncoding(withAllowedCharacters: CharacterSet.urlHostAllowed) {
                     return "\(key)=\(escapedValue)"
                 } else {
                     preconditionFailure("Failed to URL-escape string: \(value)")
                 }
             }
-            let queryString = queryItems.joinWithSeparator("&")
-            URL = NSURL(string: "\(path)?\(queryString)")
+            let queryString = queryItems.joined(separator: "&")
+            URL = Foundation.URL(string: "\(path)?\(queryString)")
         }
 
         if let URL = URL {

@@ -14,7 +14,7 @@ struct FeatureTimelineDay {
 
     let animatingFeatures: ArraySlice<AnimatingFeature>
     let dateString: String
-    let animationStartTime: NSTimeInterval
-    let animationDuration: NSTimeInterval
+    let animationStartTime: TimeInterval
+    let animationDuration: TimeInterval
 
 }

@@ -12,7 +12,7 @@ import UIKit
 
 class RoundedCornerView: UIView {
 
-    private let maskLayer = CAShapeLayer()
+    fileprivate let maskLayer = CAShapeLayer()
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -24,18 +24,18 @@ class RoundedCornerView: UIView {
         configureView()
     }
 
-    private func configureView() {
+    fileprivate func configureView() {
         self.layer.mask = maskLayer
     }
 
     // MARK: CALayerDelegate
 
-    override func layoutSublayersOfLayer(layer: CALayer) {
-        super.layoutSublayersOfLayer(layer)
+    override func layoutSublayers(of layer: CALayer) {
+        super.layoutSublayers(of: layer)
 
         if layer == self.layer {
             maskLayer.frame = layer.bounds
-            maskLayer.path = UIBezierPath(roundedRect: maskLayer.bounds, cornerRadius: 10.0).CGPath
+            maskLayer.path = UIBezierPath(roundedRect: maskLayer.bounds, cornerRadius: 10.0).cgPath
         }
     }
 

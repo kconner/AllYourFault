@@ -14,9 +14,9 @@ final class FeatureTimelineDayCell: UICollectionViewCell {
 
     static let reuseIdentifier = "FeatureTimelineDayCell"
 
-    private static let textAttributes: [String: AnyObject] = [
+    fileprivate static let textAttributes: [String: AnyObject] = [
         NSForegroundColorAttributeName: Colors.textColor,
-        NSFontAttributeName: UIFont.systemFontOfSize(13.0)
+        NSFontAttributeName: UIFont.systemFont(ofSize: 13.0)
     ]
 
     var featureTimelineDay: FeatureTimelineDay? {
@@ -35,26 +35,26 @@ final class FeatureTimelineDayCell: UICollectionViewCell {
         configureView()
     }
 
-    private func configureView() {
+    fileprivate func configureView() {
         backgroundColor = Colors.backgroundColor
     }
 
     // MARK: UIView
 
-    override func drawRect(rect: CGRect) {
+    override func draw(_ rect: CGRect) {
         let context = UIGraphicsGetCurrentContext()
 
         // Draw hash line at the left edge.
         Colors.textColor.setFill()
-        CGContextFillRect(context, CGRectMake(0.0, 0.0, 0.5, rect.height))
+        context?.fill(CGRect(x: 0.0, y: 0.0, width: 0.5, height: rect.height))
 
         if let featureTimelineDay = featureTimelineDay {
             // Draw day text next to the hash line, on the bottom.
-            featureTimelineDay.dateString.drawAtPoint(CGPointMake(3.0, rect.height - 15.0), withAttributes: FeatureTimelineDayCell.textAttributes)
+            featureTimelineDay.dateString.draw(at: CGPoint(x: 3.0, y: rect.height - 15.0), withAttributes: FeatureTimelineDayCell.textAttributes)
             
             // Draw dots for each feature.
             let dotRadius: CGFloat = 1.75
-            let dotRect = CGRectMake(-dotRadius, -dotRadius, dotRadius * 2.0, dotRadius * 2.0)
+            let dotRect = CGRect(x: -dotRadius, y: -dotRadius, width: dotRadius * 2.0, height: dotRadius * 2.0)
             Colors.orangeColor.setFill()
             for animatingFeature in featureTimelineDay.animatingFeatures {
                 let xPosition = rect.width * CGFloat((animatingFeature.startTime - featureTimelineDay.animationStartTime) / featureTimelineDay.animationDuration)
@@ -63,7 +63,7 @@ final class FeatureTimelineDayCell: UICollectionViewCell {
                 let yOffset = rect.height * (1.0 - CGFloat(animatingFeature.feature.magnitude / AnimatingFeature.magnitudeMax))
                 let dotFrame = dotRect.offsetBy(dx: xOffset, dy: yOffset)
                 
-                CGContextFillEllipseInRect(context, dotFrame)
+                context?.fillEllipse(in: dotFrame)
             }
         }
     }

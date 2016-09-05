@@ -13,11 +13,11 @@ enum APIResult<A, B> {
     case Success(Box<A>)
     case Failure(Box<B>)
 
-    static func success(value: A) -> APIResult<A, B> {
+    static func success(_ value: A) -> APIResult<A, B> {
         return .Success(Box(value))
     }
 
-    static func failure(value: B) -> APIResult<A, B> {
+    static func failure(_ value: B) -> APIResult<A, B> {
         return .Failure(Box(value))
     }
 

@@ -17,17 +17,17 @@ import MapKit
 
 final class FeatureMapViewController: UIViewController {
 
-    private enum DataState {
-        case Empty(String?)
-        case Loading(NSURLSessionTask)
-        case Populated(FeatureMapViewModel)
-        case PopulatedAndLoading(NSURLSessionTask, FeatureMapViewModel)
+    fileprivate enum DataState {
+        case empty(String?)
+        case loading(URLSessionTask)
+        case populated(FeatureMapViewModel)
+        case populatedAndLoading(URLSessionTask, FeatureMapViewModel)
 
-        var currentUpdateTask: NSURLSessionTask? {
+        var currentUpdateTask: URLSessionTask? {
             switch self {
-            case .Loading(let task):
+            case .loading(let task):
                 return task
-            case .PopulatedAndLoading(let task, _):
+            case .populatedAndLoading(let task, _):
                 return task
             default:
                 return nil
@@ -36,9 +36,9 @@ final class FeatureMapViewController: UIViewController {
         
         var viewModel: FeatureMapViewModel? {
             switch self {
-            case .Populated(let viewModel):
+            case .populated(let viewModel):
                 return viewModel
-            case .PopulatedAndLoading(_, let viewModel):
+            case .populatedAndLoading(_, let viewModel):
                 return viewModel
             default:
                 return nil
@@ -46,10 +46,10 @@ final class FeatureMapViewController: UIViewController {
         }
     }
 
-    private static let messageViewVerticalMargin: CGFloat = 8.0
-    private static let messageViewOutsetWhenHidden: CGFloat = 16.0
-    private static let controlsVerticalMargin: CGFloat = 16.0
-    private static let controlsOutsetWhenHidden: CGFloat = 32.0
+    fileprivate static let messageViewVerticalMargin: CGFloat = 8.0
+    fileprivate static let messageViewOutsetWhenHidden: CGFloat = 16.0
+    fileprivate static let controlsVerticalMargin: CGFloat = 16.0
+    fileprivate static let controlsOutsetWhenHidden: CGFloat = 32.0
 
     @IBOutlet var mapView: MKMapView!
     @IBOutlet var messageView: UIView!
@@ -59,15 +59,15 @@ final class FeatureMapViewController: UIViewController {
     @IBOutlet var timelineView: FeatureTimelineView!
     @IBOutlet var timelineViewBottomConstraint: NSLayoutConstraint!
 
-    private var lastMapRegion: MKCoordinateRegion!
+    fileprivate var lastMapRegion: MKCoordinateRegion!
 
-    private var dataState: DataState = .Empty(nil) {
+    fileprivate var dataState: DataState = .empty(nil) {
         didSet {
             resetViewsForDataStateAnimated(true)
         }
     }
 
-    private var animationTime: NSTimeInterval = 0.0 {
+    fileprivate var animationTime: TimeInterval = 0.0 {
         didSet {
             if animationTime != oldValue {
                 moveAnimationToTime(animationTime)
@@ -75,8 +75,8 @@ final class FeatureMapViewController: UIViewController {
         }
     }
 
-    private var displayLink: CADisplayLink?
-    private var lastDisplayLinkTimestamp: NSTimeInterval?
+    fileprivate var displayLink: CADisplayLink?
+    fileprivate var lastDisplayLinkTimestamp: TimeInterval?
 
     deinit {
         displayLink?.invalidate()
@@ -106,8 +106,8 @@ final class FeatureMapViewController: UIViewController {
         timelineView.currentAnimationTime = animationTime
     }
 
-    override func preferredStatusBarStyle() -> UIStatusBarStyle {
-        return .LightContent
+    override var preferredStatusBarStyle: UIStatusBarStyle {
+        return .lightContent
     }
 
 }
@@ -116,76 +116,76 @@ extension FeatureMapViewController {
 
     // MARK: Data state
 
-    private func loadDataForMapRegion() {
+    fileprivate func loadDataForMapRegion() {
         // Allow only one update task to run at a time.
         dataState.currentUpdateTask?.cancel()
 
         let request = APIEndpoints.highestMagnitudeEarthquakesRequestWithCoordinateRegion(coordinateRegionForQuery, limit: 100)
-        var task: NSURLSessionTask! = nil
-        task = request.taskWithSession(NSURLSession.sharedSession()) { [weak self] result -> Void in
+        var task: URLSessionTask! = nil
+        task = request.taskWithSession(URLSession.shared) { [weak self] result -> Void in
             // I'd like to have a mechanism to cancel this task after the response is received but before result preparation ends.
             // Mapping 100 earthquakes to native objects usually takes 0.18s on iPhone 6, and that's a wide enough window to get unwanted results.
             // For now I'm using the task identifier to ensure we only use the response for the most recently sent request.
             if let strongSelf = self,
                 let task = task
-                where task.taskIdentifier == strongSelf.dataState.currentUpdateTask?.taskIdentifier {
+                , task.taskIdentifier == strongSelf.dataState.currentUpdateTask?.taskIdentifier {
 
                 strongSelf.enterStateForAPIResult(result)
             }
         }
 
         switch dataState {
-        case .Populated(let viewModel):
-            dataState = .PopulatedAndLoading(task, viewModel)
-        case .PopulatedAndLoading(_, let viewModel):
-            dataState = .PopulatedAndLoading(task, viewModel)
-        case .Empty, .Loading:
-            dataState = .Loading(task)
+        case .populated(let viewModel):
+            dataState = .populatedAndLoading(task, viewModel)
+        case .populatedAndLoading(_, let viewModel):
+            dataState = .populatedAndLoading(task, viewModel)
+        case .empty, .loading:
+            dataState = .loading(task)
         }
 
         task.resume()
     }
 
-    private var coordinateRegionForQuery: MKCoordinateRegion {
+    fileprivate var coordinateRegionForQuery: MKCoordinateRegion {
         let insets = UIEdgeInsetsMake(0.0, 0.0, FeatureTimelineView.standardHeight + FeatureMapViewController.controlsVerticalMargin, 0.0)
         let unobscuredRect = UIEdgeInsetsInsetRect(mapView.bounds, insets)
-        return mapView.convertRect(unobscuredRect, toRegionFromView: mapView)
+        return mapView.convert(unobscuredRect, toRegionFrom: mapView)
     }
 
-    private func enterStateForAPIResult(result: APIResult<[Feature], APIError>) {
+    fileprivate func enterStateForAPIResult(_ result: APIResult<[Feature], APIError>) {
         switch result {
         case .Success(let features):
             if 0 < features.unbox.count {
                 let viewModel = FeatureMapViewModel(features: features.unbox)
-                dataState = .Populated(viewModel)
+                dataState = .populated(viewModel)
             } else {
-                dataState = .Empty("We didn't find any recent earthquakes here.")
+                dataState = .empty("We didn't find any recent earthquakes here.")
             }
         case .Failure(let error):
-            dataState = .Empty("\(error.unbox.title): \(error.unbox.message)")
+            dataState = .empty("\(error.unbox.title): \(error.unbox.message)")
         }
     }
 
-    private func resetViewsForDataStateAnimated(animated: Bool) {
+    fileprivate func resetViewsForDataStateAnimated(_ animated: Bool) {
         let message: String?
         let showControls: Bool
         let resetFeatureAnimation: Bool
 
         switch dataState {
-        case .Empty(let emptyMessage):
+        case .empty(let emptyMessage):
             message = emptyMessage
             showControls = false
             resetFeatureAnimation = true
-        case .Loading:
+        case .loading:
             message = "Loading…"
             showControls = false
             resetFeatureAnimation = true
-        case .Populated(let viewModel):
+        case .populated(let viewModel):
             message = nil
             showControls = true
             resetFeatureAnimation = true
             timelineView.prepareWithAnimatingFeatures(viewModel.animatingFeatures, animationDuration: viewModel.animationDuration, firstDate: viewModel.firstDate)
-        case .PopulatedAndLoading:
+        case .populatedAndLoading:
             message = "Loading…"
             showControls = true
             resetFeatureAnimation = false
@@ -211,7 +211,7 @@ extension FeatureMapViewController {
         configureOverlaysWithMessage(message, showingControls: showControls, animated: animated)
     }
 
-    private func configureOverlaysWithMessage(message: String?, showingControls showControls: Bool, animated: Bool) {
+    fileprivate func configureOverlaysWithMessage(_ message: String?, showingControls showControls: Bool, animated: Bool) {
         // Show or hide the message view.
         let adjustViews: () -> Void = {
             if let message = message {
@@ -235,7 +235,7 @@ extension FeatureMapViewController {
         }
         
         if animated {
-            UIView.animateWithDuration(0.15, delay: 0.0, options: .BeginFromCurrentState, animations: {
+            UIView.animate(withDuration: 0.15, delay: 0.0, options: .beginFromCurrentState, animations: {
                 adjustViews()
                 self.view.layoutIfNeeded()
             }, completion: nil)
@@ -254,7 +254,7 @@ extension FeatureMapViewController {
         return dataState.viewModel != nil
     }
 
-    @IBAction func didTapPlayPauseButton(sender: AnyObject) {
+    @IBAction func didTapPlayPauseButton(_ sender: AnyObject) {
         timelineView.stopDecelerating()
 
         if displayLink != nil {
@@ -264,20 +264,20 @@ extension FeatureMapViewController {
         }
     }
 
-    private func pauseAnimation() {
-        playPauseButton.setImage(UIImage(named: "play"), forState: .Normal)
+    fileprivate func pauseAnimation() {
+        playPauseButton.setImage(UIImage(named: "play"), for: UIControlState())
 
         invalidateDisplayLink()
     }
 
-    private func playAnimation() {
-        playPauseButton.setImage(UIImage(named: "pause"), forState: .Normal)
+    fileprivate func playAnimation() {
+        playPauseButton.setImage(UIImage(named: "pause"), for: UIControlState())
 
         invalidateDisplayLink()
 
         // If we are at the end of the animation, go to the beginning. Otherwise continue from where we are.
         if let animationDuration = dataState.viewModel?.animationDuration
-            where animationDuration <= animationTime {
+            , animationDuration <= animationTime {
 
             animationTime = 0.0
         }
@@ -285,16 +285,16 @@ extension FeatureMapViewController {
         let displayLink = CADisplayLink(target: self, selector: #selector(advanceAnimation(_:)))
         self.displayLink = displayLink
         // NSRunLoopCommonModes: Also update during map deceleration animation.
-        displayLink.addToRunLoop(NSRunLoop.mainRunLoop(), forMode: NSRunLoopCommonModes)
+        displayLink.add(to: RunLoop.main, forMode: RunLoopMode.commonModes)
     }
 
-    private func invalidateDisplayLink() {
+    fileprivate func invalidateDisplayLink() {
         displayLink?.invalidate()
         displayLink = nil
         lastDisplayLinkTimestamp = nil
     }
 
-    func advanceAnimation(displayLink: CADisplayLink) {
+    func advanceAnimation(_ displayLink: CADisplayLink) {
         if let lastDisplayLinkTimestamp = lastDisplayLinkTimestamp {
             animationTime += displayLink.timestamp - lastDisplayLinkTimestamp
 
@@ -305,16 +305,16 @@ extension FeatureMapViewController {
 
         // Stop when we reach the total animation duration.
         if let animationDuration = dataState.viewModel?.animationDuration
-            where animationDuration <= animationTime {
+            , animationDuration <= animationTime {
                 
             pauseAnimation()
         }
     }
 
-    private func moveAnimationToTime(time: NSTimeInterval) {
+    fileprivate func moveAnimationToTime(_ time: TimeInterval) {
         if let animationFeatures = dataState.viewModel?.animatingFeatures {
             for animationFeature in animationFeatures {
-                if let annotationView = mapView.viewForAnnotation(animationFeature.feature) as? FeatureAnnotationView {
+                if let annotationView = mapView.view(for: animationFeature.feature) as? FeatureAnnotationView {
                     annotationView.finalScale = animationFeature.scale
                     annotationView.animationInterpolant = (time - animationFeature.startTime) / animationFeature.duration
                 }
@@ -326,14 +326,14 @@ extension FeatureMapViewController {
 
 extension FeatureMapViewController: MKMapViewDelegate {
 
-    private func coordinateRegionsAreEqual(region1: MKCoordinateRegion, _ region2: MKCoordinateRegion) -> Bool {
+    fileprivate func coordinateRegionsAreEqual(_ region1: MKCoordinateRegion, _ region2: MKCoordinateRegion) -> Bool {
         return region1.center.latitude == region2.center.latitude
             && region1.center.longitude == region2.center.longitude
             && region1.span.latitudeDelta == region2.span.latitudeDelta
             && region1.span.longitudeDelta == region2.span.longitudeDelta
     }
 
-    func mapView(mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
+    func mapView(_ mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
         let region = mapView.region
 
         // We can get duplicate calls to this method with no change. Only load new data if the region changed meaningfully.
@@ -343,11 +343,11 @@ extension FeatureMapViewController: MKMapViewDelegate {
         }
     }
 
-    func mapView(mapView: MKMapView, viewForAnnotation annotation: MKAnnotation) -> MKAnnotationView? {
+    func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
         let reuseIdentifier = "FeatureAnnotation"
 
         if annotation is Feature {
-            if let existingAnnotationView = mapView.dequeueReusableAnnotationViewWithIdentifier(reuseIdentifier) as? FeatureAnnotationView {
+            if let existingAnnotationView = mapView.dequeueReusableAnnotationView(withIdentifier: reuseIdentifier) as? FeatureAnnotationView {
                 return existingAnnotationView
             } else {
                 return FeatureAnnotationView(annotation: annotation, reuseIdentifier: reuseIdentifier)
@@ -361,7 +361,7 @@ extension FeatureMapViewController: MKMapViewDelegate {
 
 extension FeatureMapViewController: FeatureTimelineViewDelegate {
 
-    func featureTimelineView(featureTimelineView: FeatureTimelineView, didScrubToTime time: NSTimeInterval) {
+    func featureTimelineView(_ featureTimelineView: FeatureTimelineView, didScrubToTime time: TimeInterval) {
         if isAnimationAvailable {
             pauseAnimation()
             animationTime = time
