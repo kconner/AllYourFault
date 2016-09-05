@@ -26,7 +26,7 @@ struct FeatureMapViewModel {
     init(features: [Feature]) {
         precondition(0 < features.count, "There should be at least one Feature.")
 
-        let orderedFeatures = features.sorted { (feature1: Feature, feature2: Feature) -> Bool in
+        let orderedFeatures = features.sort { (feature1: Feature, feature2: Feature) -> Bool in
             return feature1.date.compare(feature2.date) == .OrderedAscending
         }
 

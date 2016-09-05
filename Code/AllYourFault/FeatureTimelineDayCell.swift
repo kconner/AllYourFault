@@ -14,7 +14,7 @@ final class FeatureTimelineDayCell: UICollectionViewCell {
 
     static let reuseIdentifier = "FeatureTimelineDayCell"
 
-    private static let textAttributes: [NSObject: AnyObject] = [
+    private static let textAttributes: [String: AnyObject] = [
         NSForegroundColorAttributeName: Colors.textColor,
         NSFontAttributeName: UIFont.systemFontOfSize(13.0)
     ]
@@ -30,7 +30,7 @@ final class FeatureTimelineDayCell: UICollectionViewCell {
         configureView()
     }
 
-    required init(coder aDecoder: NSCoder) {
+    required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
         configureView()
     }
@@ -61,7 +61,7 @@ final class FeatureTimelineDayCell: UICollectionViewCell {
                 // If a dot would end up being cut off by the cell boundary, scoot it in a pixel or two.
                 let xOffset = max(dotRadius, min(rect.width - dotRadius, xPosition))
                 let yOffset = rect.height * (1.0 - CGFloat(animatingFeature.feature.magnitude / AnimatingFeature.magnitudeMax))
-                let dotFrame = dotRect.rectByOffsetting(dx: xOffset, dy: yOffset)
+                let dotFrame = dotRect.offsetBy(dx: xOffset, dy: yOffset)
                 
                 CGContextFillEllipseInRect(context, dotFrame)
             }

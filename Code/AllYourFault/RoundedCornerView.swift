@@ -19,7 +19,7 @@ class RoundedCornerView: UIView {
         configureView()
     }
 
-    required init(coder aDecoder: NSCoder) {
+    required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
         configureView()
     }
@@ -30,7 +30,7 @@ class RoundedCornerView: UIView {
 
     // MARK: CALayerDelegate
 
-    override func layoutSublayersOfLayer(layer: CALayer!) {
+    override func layoutSublayersOfLayer(layer: CALayer) {
         super.layoutSublayersOfLayer(layer)
 
         if layer == self.layer {

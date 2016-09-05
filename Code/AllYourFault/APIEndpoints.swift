@@ -33,7 +33,7 @@ final class APIEndpoints {
 
         return APIRequest<[Feature]>(URL: url,
             successKey: "features",
-            mapSuccessValue: MapPlist.array(strict: false, mapItem: Feature.mapPlistValue))
+            mapSuccessValue: MapPlist.array(false, mapItem: Feature.mapPlistValue))
     }
 
     // MARK: Helpers
@@ -43,14 +43,14 @@ final class APIEndpoints {
         if parameters.count == 0 {
             URL = NSURL(string: path)
         } else {
-            let queryItems = map(parameters) { (key, value) -> String in
+            let queryItems = parameters.map { (key, value) -> String in
                 if let escapedValue = value.stringByAddingPercentEncodingWithAllowedCharacters(NSCharacterSet.URLHostAllowedCharacterSet()) {
                     return "\(key)=\(escapedValue)"
                 } else {
                     preconditionFailure("Failed to URL-escape string: \(value)")
                 }
             }
-            let queryString = join("&", queryItems)
+            let queryString = queryItems.joinWithSeparator("&")
             URL = NSURL(string: "\(path)?\(queryString)")
         }
 

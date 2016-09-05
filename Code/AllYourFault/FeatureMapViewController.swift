@@ -168,7 +168,6 @@ extension FeatureMapViewController {
 
     private func resetViewsForDataStateAnimated(animated: Bool) {
         let message: String?
-        let showMessageView: Bool
         let showControls: Bool
         let resetFeatureAnimation: Bool
 
@@ -186,7 +185,7 @@ extension FeatureMapViewController {
             showControls = true
             resetFeatureAnimation = true
             timelineView.prepareWithAnimatingFeatures(viewModel.animatingFeatures, animationDuration: viewModel.animationDuration, firstDate: viewModel.firstDate)
-        case .PopulatedAndLoading(_, let viewModel):
+        case .PopulatedAndLoading:
             message = "Loading…"
             showControls = true
             resetFeatureAnimation = false
@@ -196,7 +195,7 @@ extension FeatureMapViewController {
             // Tear down annotations
             mapView.removeAnnotations(mapView.annotations)
 
-            if let viewModel = dataState.viewModel {
+            if dataState.viewModel != nil {
                 // Reset animation state
                 pauseAnimation()
                 animationTime = 0.0
@@ -258,7 +257,7 @@ extension FeatureMapViewController {
     @IBAction func didTapPlayPauseButton(sender: AnyObject) {
         timelineView.stopDecelerating()
 
-        if let displayLink = displayLink {
+        if displayLink != nil {
             pauseAnimation()
         } else {
             playAnimation()
@@ -283,7 +282,7 @@ extension FeatureMapViewController {
             animationTime = 0.0
         }
 
-        let displayLink = CADisplayLink(target: self, selector: "advanceAnimation:")
+        let displayLink = CADisplayLink(target: self, selector: #selector(advanceAnimation(_:)))
         self.displayLink = displayLink
         // NSRunLoopCommonModes: Also update during map deceleration animation.
         displayLink.addToRunLoop(NSRunLoop.mainRunLoop(), forMode: NSRunLoopCommonModes)
@@ -334,7 +333,7 @@ extension FeatureMapViewController: MKMapViewDelegate {
             && region1.span.longitudeDelta == region2.span.longitudeDelta
     }
 
-    func mapView(mapView: MKMapView!, regionDidChangeAnimated animated: Bool) {
+    func mapView(mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
         let region = mapView.region
 
         // We can get duplicate calls to this method with no change. Only load new data if the region changed meaningfully.
@@ -344,10 +343,10 @@ extension FeatureMapViewController: MKMapViewDelegate {
         }
     }
 
-    func mapView(mapView: MKMapView!, viewForAnnotation annotation: MKAnnotation!) -> MKAnnotationView! {
+    func mapView(mapView: MKMapView, viewForAnnotation annotation: MKAnnotation) -> MKAnnotationView? {
         let reuseIdentifier = "FeatureAnnotation"
 
-        if let feature = annotation as? Feature {
+        if annotation is Feature {
             if let existingAnnotationView = mapView.dequeueReusableAnnotationViewWithIdentifier(reuseIdentifier) as? FeatureAnnotationView {
                 return existingAnnotationView
             } else {

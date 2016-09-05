@@ -31,7 +31,7 @@ final class FeatureAnnotationView: MKAnnotationView {
         super.init(frame: frame)
 
         image = UIImage(named: "annotation")
-        let imageSize = image.size
+        let imageSize = image?.size ?? .zero
 
         if let rippleImage = UIImage(named: "ripple") {
             rippleLayer.contents = rippleImage.CGImage
@@ -49,11 +49,11 @@ final class FeatureAnnotationView: MKAnnotationView {
         layer.addSublayer(rippleLayer)
     }
 
-    override init!(annotation: MKAnnotation!, reuseIdentifier: String!) {
+    override init(annotation: MKAnnotation?, reuseIdentifier: String?) {
         super.init(annotation: annotation, reuseIdentifier: reuseIdentifier)
     }
 
-    required init(coder aDecoder: NSCoder) {
+    required init?(coder aDecoder: NSCoder) {
         preconditionFailure("Initializing FeatureAnnotationView with an NSCoder is not supported.")
     }
 

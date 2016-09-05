@@ -52,7 +52,6 @@ struct APIRequest<T> {
                 let HTTPResponse = response as? NSHTTPURLResponse {
                     
                 dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)) {
-                    let startDate = NSDate()
                     let result = self.resultWithData(data, HTTPStatusCode: HTTPResponse.statusCode)
 
                     // Return on the main thread.
@@ -85,8 +84,15 @@ struct APIRequest<T> {
     private func resultWithData(responseBodyData: NSData, HTTPStatusCode: Int) -> ResultType {
         // Parse response body as JSON to plist objects.
         var error: NSError?
-        let plistValue: PlistValue = NSJSONSerialization.JSONObjectWithData(responseBodyData, options: nil, error: &error)
-        if let error = error {
+        let plistValue: PlistValue
+        do {
+            plistValue = try NSJSONSerialization.JSONObjectWithData(responseBodyData, options: [])
+        } catch let error1 as NSError {
+            error = error1
+            plistValue = nil
+        }
+        
+        if error != nil {
             return APIRequest.invalidDataResultWithStatusCode(HTTPStatusCode)
         }
 

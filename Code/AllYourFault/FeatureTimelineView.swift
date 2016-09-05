@@ -56,14 +56,14 @@ final class FeatureTimelineView: RoundedCornerView, UIScrollViewDelegate {
         configureView()
     }
 
-    required init(coder aDecoder: NSCoder) {
+    required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
         configureView()
     }
 
     private func configureView() {
         collectionView.frame = self.bounds
-        collectionView.autoresizingMask = .FlexibleWidth | .FlexibleHeight
+        collectionView.autoresizingMask = [.FlexibleWidth, .FlexibleHeight]
         collectionView.backgroundColor = Colors.backgroundColor
         collectionView.showsHorizontalScrollIndicator = false
         collectionView.dataSource = self
@@ -79,7 +79,7 @@ final class FeatureTimelineView: RoundedCornerView, UIScrollViewDelegate {
         addSubview(collectionView)
 
         let dividerView = UIView(frame: CGRectMake(self.bounds.midX, 0.0, 1.0, self.bounds.height))
-        dividerView.autoresizingMask = .FlexibleLeftMargin | .FlexibleRightMargin | .FlexibleHeight
+        dividerView.autoresizingMask = [.FlexibleLeftMargin, .FlexibleRightMargin, .FlexibleHeight]
         dividerView.backgroundColor = Colors.orangeColor
         dividerView.userInteractionEnabled = false
         addSubview(dividerView)
@@ -94,13 +94,13 @@ final class FeatureTimelineView: RoundedCornerView, UIScrollViewDelegate {
         oneDayComponents.day = 1
 
         // Get parameters for the first day in the timeline.
-        var dayDateComponents = calendar.components(.CalendarUnitYear | .CalendarUnitMonth | .CalendarUnitDay, fromDate: firstDate)
+        let dayDateComponents = calendar.components([.Year, .Month, .Day], fromDate: firstDate)
         let firstDayStartDate: NSDate! = calendar.dateFromComponents(dayDateComponents)
         // When during the first day does the overall animation begin?
         let animationTimeOffset = firstDate.timeIntervalSinceDate(firstDayStartDate) * FeatureMapViewModel.animationTimePerRealTime
 
         var dayStartDate = firstDayStartDate
-        var dayEndDate: NSDate! = calendar.dateByAddingComponents(oneDayComponents, toDate: dayStartDate, options: nil)
+        var dayEndDate: NSDate! = calendar.dateByAddingComponents(oneDayComponents, toDate: dayStartDate, options: [])
         var dayStartIndex = 0
         var dayAnimationStartTime = -animationTimeOffset
 
@@ -116,14 +116,14 @@ final class FeatureTimelineView: RoundedCornerView, UIScrollViewDelegate {
 
             // Advance parameters to the next day.
             dayStartDate = dayEndDate
-            dayEndDate = calendar.dateByAddingComponents(oneDayComponents, toDate: dayStartDate, options: nil)
+            dayEndDate = calendar.dateByAddingComponents(oneDayComponents, toDate: dayStartDate, options: [])
             dayStartIndex = dayEndIndex
             dayAnimationStartTime += animationDuration
         }
 
         // Features are ordered by date, and we are configured for the first day.
         // Find the end index for each day by walking through all the features.
-        for (index, animatingFeature) in enumerate(animatingFeatures) {
+        for (index, animatingFeature) in animatingFeatures.enumerate() {
             while animatingFeature.feature.date.compare(dayEndDate) != .OrderedAscending {
                 saveDayWithEndIndex(index)
             }
@@ -172,7 +172,7 @@ final class FeatureTimelineView: RoundedCornerView, UIScrollViewDelegate {
 extension FeatureTimelineView: UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
 
     private func dayAtIndexPath(indexPath: NSIndexPath) -> FeatureTimelineDay? {
-        if indices(days) ~= indexPath.row {
+        if days.indices ~= indexPath.row {
             return days[indexPath.row]
         } else {
             return nil
@@ -184,7 +184,7 @@ extension FeatureTimelineView: UICollectionViewDataSource, UICollectionViewDeleg
     }
 
     func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCellWithReuseIdentifier(FeatureTimelineDayCell.reuseIdentifier, forIndexPath: indexPath) as! UICollectionViewCell
+        let cell = collectionView.dequeueReusableCellWithReuseIdentifier(FeatureTimelineDayCell.reuseIdentifier, forIndexPath: indexPath) 
 
         if let dayCell = cell as? FeatureTimelineDayCell,
             let day = dayAtIndexPath(indexPath) {
@@ -203,9 +203,7 @@ extension FeatureTimelineView: UICollectionViewDataSource, UICollectionViewDeleg
         }
     }
 
-}
-
-extension FeatureTimelineView: UIScrollViewDelegate {
+    // MARK: UIScrollViewDelegate
 
     func scrollViewDidScroll(scrollView: UIScrollView) {
         // Only report scrolling done by the user.

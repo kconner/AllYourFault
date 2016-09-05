@@ -55,21 +55,23 @@ final class MapPlist {
     // This function is curried so as to produce a mapping function for a given item type.
     // mapItem is used to map each item of the array.
     // When strict, if any item fails to map, the whole array will fail. Otherwise failed items are omitted.
-    class func array<T>(strict: Bool = true, mapItem: PlistValue -> T?)(_ value: PlistValue) -> [T]? {
-        if let array = value as? NSArray {
-            var result: [T] = []
+    class func array<T>(strict: Bool = true, mapItem: PlistValue -> T?) -> (PlistValue) -> [T]? {
+        return { value in
+            if let array = value as? NSArray {
+                var result: [T] = []
 
-            for item in array {
-                if let mappedItem = mapItem(item) {
-                    result.append(mappedItem)
-                } else if strict {
-                    return nil
+                for item in array {
+                    if let mappedItem = mapItem(item) {
+                        result.append(mappedItem)
+                    } else if strict {
+                        return nil
+                    }
                 }
-            }
 
-            return result
-        } else {
-            return nil
+                return result
+            } else {
+                return nil
+            }
         }
     }
    
