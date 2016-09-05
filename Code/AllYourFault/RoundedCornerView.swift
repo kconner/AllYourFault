@@ -12,7 +12,7 @@ import UIKit
 
 class RoundedCornerView: UIView {
 
-    fileprivate let maskLayer = CAShapeLayer()
+    private let maskLayer = CAShapeLayer()
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -24,7 +24,7 @@ class RoundedCornerView: UIView {
         configureView()
     }
 
-    fileprivate func configureView() {
+    private func configureView() {
         self.layer.mask = maskLayer
     }
 

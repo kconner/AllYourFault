@@ -9,7 +9,7 @@
 import Foundation
 import MapKit
 
-// A property list (.plist) value is anything that NSJSONSerialization can produce from JSON.
+// A property list (.plist) value is anything that JSONSerialization can produce from JSON.
 // This can be a number, string, array, dictionary with string keys, or nil, hence the optional type.
 typealias PlistValue = AnyObject?
 
@@ -30,7 +30,7 @@ final class MapPlist {
     }
 
     // Expects a double representing a Unix Epoch date.
-    class func dateWithUnixTime(_ value: PlistValue) -> Date? {
+    class func date(unixTime value: PlistValue) -> Date? {
         if let milliseconds = MapPlist.double(value) {
             return Date(timeIntervalSince1970: TimeInterval(milliseconds) / 1000.0)
         } else {
@@ -40,7 +40,7 @@ final class MapPlist {
 
     // Expects an array of doubles representing longitude, latitude, _.
     // Should we return the coordinate and depth as a tuple?
-    class func coordinate2DWithPoint(_ value: PlistValue) -> CLLocationCoordinate2D? {
+    class func coordinate2D(point value: PlistValue) -> CLLocationCoordinate2D? {
         if let array = MapPlist.array(mapItem: MapPlist.double)(value) , array.count == 3 {
             return CLLocationCoordinate2D(latitude: array[1], longitude: array[0])
         } else {

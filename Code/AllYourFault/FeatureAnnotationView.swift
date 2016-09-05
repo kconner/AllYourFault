@@ -12,7 +12,7 @@ import MapKit
 
 final class FeatureAnnotationView: MKAnnotationView {
 
-    fileprivate let rippleLayer = CALayer()
+    private let rippleLayer = CALayer()
 
     var finalScale: CGFloat = 0.0
 
@@ -20,7 +20,7 @@ final class FeatureAnnotationView: MKAnnotationView {
     var animationInterpolant: TimeInterval = 0.0 {
         didSet {
             if animationInterpolant != oldValue {
-                moveAnimationToInterpolant(animationInterpolant, fromInterpolant: oldValue)
+                moveAnimation(to: animationInterpolant, from: oldValue)
             }
         }
     }
@@ -31,14 +31,14 @@ final class FeatureAnnotationView: MKAnnotationView {
         image = UIImage(named: "annotation")
         let imageSize = image?.size ?? .zero
 
-        if let rippleImage = UIImage(named: "ripple") {
-            rippleLayer.contents = rippleImage.cgImage
-            rippleLayer.bounds = CGRect(origin: CGPoint.zero, size: rippleImage.size)
-            rippleLayer.position = CGPoint(x: imageSize.width / 2.0, y: imageSize.height / 2.0)
-            rippleLayer.anchorPoint = CGPoint(x: 0.5, y: 0.5)
-        } else {
-            assertionFailure("Ripple image did not exist.")
+        guard let rippleImage = UIImage(named: "ripple") else {
+            preconditionFailure("Ripple image did not exist.")
         }
+
+        rippleLayer.contents = rippleImage.cgImage
+        rippleLayer.bounds = CGRect(origin: CGPoint.zero, size: rippleImage.size)
+        rippleLayer.position = CGPoint(x: imageSize.width / 2.0, y: imageSize.height / 2.0)
+        rippleLayer.anchorPoint = CGPoint(x: 0.5, y: 0.5)
 
         rippleLayer.opacity = 0.0
         rippleLayer.transform = CATransform3DMakeScale(0.0, 0.0, 0.0)
@@ -53,14 +53,14 @@ final class FeatureAnnotationView: MKAnnotationView {
 
     // MARK: Helpers
 
-    fileprivate func moveAnimationToInterpolant(_ interpolant: TimeInterval, fromInterpolant: TimeInterval) {
+    private func moveAnimation(to newInterpolant: TimeInterval, from oldInterpolant: TimeInterval) {
         let maxOpacity: Float = 1.0
 
         let rippleScale: CGFloat
         let rippleOpacity: Float
 
-        if interpolant <= 0.0 || 1.0 <= interpolant {
-            if fromInterpolant <= 0.0 || 1.0 <= fromInterpolant {
+        if newInterpolant <= 0.0 || 1.0 <= newInterpolant {
+            if oldInterpolant <= 0.0 || 1.0 <= oldInterpolant {
                 // There is no significant work to do since neither timestamp is within the animation.
                 return
             }
@@ -69,16 +69,16 @@ final class FeatureAnnotationView: MKAnnotationView {
             rippleScale = 0.0
             rippleOpacity = 0.0
         } else {
-            rippleScale = finalScale * CGFloat(interpolant)
+            rippleScale = finalScale * CGFloat(newInterpolant)
 
             // Fade in over the first fifth, then fade out over the remaining time.
-            if interpolant < 0.2 {
-                rippleOpacity = maxOpacity * 5.0 * Float(interpolant)
-            } else if interpolant < 0.5 {
+            if newInterpolant < 0.2 {
+                rippleOpacity = maxOpacity * 5.0 * Float(newInterpolant)
+            } else if newInterpolant < 0.5 {
                 rippleOpacity = 1.0
             } else {
                 // Quadratic ease-in from 0.5 to 1.0
-                let squareTerm = 2.0 * (Float(interpolant) - 0.5)
+                let squareTerm = 2.0 * (Float(newInterpolant) - 0.5)
                 rippleOpacity = maxOpacity * (1.0 - squareTerm * squareTerm)
             }
         }

@@ -14,11 +14,12 @@ import MapKit
 
 final class APIEndpoints {
 
-    class func highestMagnitudeEarthquakesRequestWithCoordinateRegion(_ region: MKCoordinateRegion, limit: Int) -> APIRequest<[Feature]> {
+    class func requestForHighestMagnitudeEarthquakes(in region: MKCoordinateRegion, limit: Int) -> APIRequest<[Feature]> {
         let halfSpanLatitude = region.span.latitudeDelta / 2.0
         let halfSpanLongitude = region.span.longitudeDelta / 2.0
 
-        let url = urlWithPath("http://ehp2-earthquake.wr.usgs.gov/fdsnws/event/1/query",
+        let url = self.url(
+            path:"http://ehp2-earthquake.wr.usgs.gov/fdsnws/event/1/query",
             parameters: ["format": "geojson",
                 "jsonerror": "true",
                 "eventtype": "earthquake",
@@ -29,36 +30,33 @@ final class APIEndpoints {
                 "minlongitude": "\(region.center.longitude - halfSpanLongitude)",
                 "maxlongitude": "\(region.center.longitude + halfSpanLongitude)",
                 "limit": String(limit),
-                "orderby": "magnitude"])
+                "orderby": "magnitude"
+            ]
+        )
 
-        return APIRequest<[Feature]>(url: url,
+        return APIRequest(
+            url: url,
             successKey: "features",
-            mapSuccessValue: MapPlist.array(false, mapItem: Feature.mapPlistValue))
+            mapSuccessValue: MapPlist.array(false, mapItem: Feature.mapPlistValue)
+        )
     }
 
     // MARK: Helpers
 
-    fileprivate class func urlWithPath(_ path: String, parameters: [String: String] = [:]) -> URL {
-        let URL: Foundation.URL?
-        if parameters.count == 0 {
-            URL = Foundation.URL(string: path)
-        } else {
-            let queryItems = parameters.map { (key, value) -> String in
-                if let escapedValue = value.addingPercentEncoding(withAllowedCharacters: CharacterSet.urlHostAllowed) {
-                    return "\(key)=\(escapedValue)"
-                } else {
-                    preconditionFailure("Failed to URL-escape string: \(value)")
-                }
-            }
-            let queryString = queryItems.joined(separator: "&")
-            URL = Foundation.URL(string: "\(path)?\(queryString)")
+    private class func url(path: String, parameters: [String: String] = [:]) -> URL {
+        guard !parameters.isEmpty else {
+            return URL(string: path)!
         }
 
-        if let URL = URL {
-            return URL
-        } else {
-            preconditionFailure("Failed to create valid URL with path: \(path) and parameters: \(parameters)")
+        let queryItems = parameters.map { (key, value) -> String in
+            if let escapedValue = value.addingPercentEncoding(withAllowedCharacters: CharacterSet.urlHostAllowed) {
+                return "\(key)=\(escapedValue)"
+            } else {
+                preconditionFailure("Failed to URL-escape string: \(value)")
+            }
         }
+        let queryString = queryItems.joined(separator: "&")
+        return URL(string: "\(path)?\(queryString)")!
     }
 
 }

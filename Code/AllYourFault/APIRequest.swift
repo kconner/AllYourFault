@@ -16,43 +16,38 @@ struct APIRequest<T> {
     typealias FailureType = APIError
     typealias ResultType = APIResult<SuccessType, FailureType>
 
-    // Using computed properties because structs don't yet support static stored properties:
-    fileprivate var successStatusCodeRange: CountableRange<Int> {
-        return 200..<300
-    }
-    fileprivate var expectedFailureStatusCodeRange: CountableRange<Int> {
-        return 400..<500
-    }
+    private let successStatusCodeRange = 200..<300
+    private let expectedFailureStatusCodeRange = 400..<500
 
-    fileprivate var failureKey: String {
+    private var failureKey: String {
         return "metadata"
     }
-    fileprivate var mapFailureValue: (PlistValue) -> FailureType? {
+    private var mapFailureValue: (PlistValue) -> FailureType? {
         return APIError.mapPlistValue
     }
 
-    fileprivate let url: Foundation.URL
-    fileprivate let successKey: String
-    fileprivate let mapSuccessValue: (PlistValue) -> SuccessType?
+    private let url: URL
+    private let successKey: String
+    private let mapSuccessValue: (PlistValue) -> SuccessType?
 
-    init(url: Foundation.URL, successKey: String, mapSuccessValue: @escaping (PlistValue) -> SuccessType?) {
+    init(url: URL, successKey: String, mapSuccessValue: @escaping (PlistValue) -> SuccessType?) {
         self.url = url
         self.successKey = successKey
         self.mapSuccessValue = mapSuccessValue
     }
 
-    // To perform the request, call .resume() on the NSURLSessionTask produced by this method.
+    // To perform the request, call .resume() on the URLSessionTask produced by this method.
     // You may .cancel() the task to prevent the completion block from being called.
-    func taskWithSession(_ session: URLSession, completion: @escaping (ResultType) -> Void) -> URLSessionTask {
+    func task(in session: URLSession, completion: @escaping (ResultType) -> Void) -> URLSessionTask {
         var task: URLSessionTask!
         task = session.dataTask(with: URLRequest(url: url), completionHandler: { (data, response, error) -> Void in
-            // In the shared instance of NSURLSession, this closure is called on a background thread, but I want to let that
+            // In the shared instance of URLSession, this closure is called on a background thread, but I want to let that
             // worker continue quickly. So only make the branch decision here, then do the rest on the appropriate thread.
             if let data = data,
-                let HTTPResponse = response as? HTTPURLResponse {
+                let httpResponse = response as? HTTPURLResponse {
                     
                 DispatchQueue.global().async {
-                    let result = self.resultWithData(data, HTTPStatusCode: HTTPResponse.statusCode)
+                    let result = self.result(from: data, httpStatusCode: httpResponse.statusCode)
 
                     // Return on the main thread.
                     DispatchQueue.main.async {
@@ -68,10 +63,10 @@ struct APIRequest<T> {
                             // No-op: Don't call completion for a cancelled request.
                         } else {
                             let message = foundationError.localizedDescription
-                            completion(APIRequest.incompleteRequestResultWithMessage(message))
+                            completion(APIRequest.incompleteRequestResult(withMessage: message))
                         }
                     } else {
-                        completion(APIRequest.unknownErrorResultWithStatusCode(APIError.unknownErrorStatus))
+                        completion(APIRequest.unknownErrorResult(withStatusCode: APIError.unknownErrorStatus))
                     }
                 }
             }
@@ -82,16 +77,16 @@ struct APIRequest<T> {
 
     // MARK: Helpers
 
-    fileprivate func resultWithData(_ responseBodyData: Data, HTTPStatusCode: Int) -> ResultType {
+    private func result(from responseBodyData: Data, httpStatusCode: Int) -> ResultType {
         // Parse response body as JSON to plist objects.
         let plistValue: PlistValue
         do {
             plistValue = try JSONSerialization.jsonObject(with: responseBodyData) as PlistValue
         } catch {
-            return APIRequest.invalidDataResultWithStatusCode(HTTPStatusCode)
+            return APIRequest.invalidDataResult(withStatusCode: httpStatusCode)
         }
         
-        let statusCode = applicationStatusCodeWithPlistValue(plistValue, HTTPStatusCode: HTTPStatusCode)
+        let statusCode = applicationStatusCode(from: plistValue, httpStatusCode: httpStatusCode)
 
         // Produce result value, usually by mapping plist objects to native objects.
         switch statusCode {
@@ -102,7 +97,7 @@ struct APIRequest<T> {
                 return APIResult.success(successValue)
             } else {
                 // Failed to map the success response data.
-                return APIRequest.invalidDataResultWithStatusCode(statusCode)
+                return APIRequest.invalidDataResult(withStatusCode: statusCode)
             }
         case expectedFailureStatusCodeRange:
             if let dictionary = MapPlist.dictionary(plistValue),
@@ -111,18 +106,18 @@ struct APIRequest<T> {
                 return APIResult.failure(failureValue)
             } else {
                 // Failed to map the error, so we don't know what the error was.
-                return APIRequest.unknownErrorResultWithStatusCode(statusCode)
+                return APIRequest.unknownErrorResult(withStatusCode: statusCode)
             }
         default:
             // Unexpected failure
-            return APIRequest.unknownErrorResultWithStatusCode(statusCode)
+            return APIRequest.unknownErrorResult(withStatusCode: statusCode)
         }
     }
 
-    fileprivate func applicationStatusCodeWithPlistValue(_ plistValue: PlistValue, HTTPStatusCode: Int) -> Int {
+    private func applicationStatusCode(from plistValue: PlistValue, httpStatusCode: Int) -> Int {
         // Surprise! The API sends a 200 HTTP status code, but in a failure case, its status field says 4xx.
         // We get to hack around that.
-        if successStatusCodeRange ~= HTTPStatusCode {
+        if successStatusCodeRange ~= httpStatusCode {
             if let dictionary = MapPlist.dictionary(plistValue),
                 let metadata = MapPlist.dictionary(dictionary["metadata"] as PlistValue),
                 let status = MapPlist.int(metadata["status"] as PlistValue) {
@@ -133,25 +128,37 @@ struct APIRequest<T> {
             }
         }
 
-        return HTTPStatusCode
+        return httpStatusCode
     }
 
-    fileprivate static func incompleteRequestResultWithMessage(_ message: String) -> ResultType {
-        return APIResult.failure(APIError(statusCode: APIError.incompleteRequestStatus,
-            title: "Connection error",
-            message: message))
+    private static func incompleteRequestResult(withMessage message: String) -> ResultType {
+        return APIResult.failure(
+            APIError(
+                statusCode: APIError.incompleteRequestStatus,
+                title: "Connection error",
+                message: message
+            )
+        )
     }
 
-    fileprivate static func invalidDataResultWithStatusCode(_ statusCode: Int) -> ResultType {
-        return APIResult.failure(APIError(statusCode: statusCode,
-            title: "Invalid data",
-            message: "We couldn't understand the data returned from the web service."))
+    private static func invalidDataResult(withStatusCode statusCode: Int) -> ResultType {
+        return APIResult.failure(
+            APIError(
+                statusCode: statusCode,
+                title: "Invalid data",
+                message: "We couldn't understand the data returned from the web service."
+            )
+        )
     }
-    
-    fileprivate static func unknownErrorResultWithStatusCode(_ statusCode: Int) -> ResultType {
-        return APIResult.failure(APIError(statusCode: statusCode,
-            title: "Unknown error",
-            message: "Sorry, something went wrong."))
+
+    private static func unknownErrorResult(withStatusCode statusCode: Int) -> ResultType {
+        return APIResult.failure(
+            APIError(
+                statusCode: statusCode,
+                title: "Unknown error",
+                message: "Sorry, something went wrong."
+            )
+        )
     }
 
 }

@@ -14,7 +14,7 @@ final class FeatureTimelineDayCell: UICollectionViewCell {
 
     static let reuseIdentifier = "FeatureTimelineDayCell"
 
-    fileprivate static let textAttributes: [String: AnyObject] = [
+    private static let textAttributes: [String: AnyObject] = [
         NSForegroundColorAttributeName: Colors.textColor,
         NSFontAttributeName: UIFont.systemFont(ofSize: 13.0)
     ]
@@ -35,18 +35,20 @@ final class FeatureTimelineDayCell: UICollectionViewCell {
         configureView()
     }
 
-    fileprivate func configureView() {
+    private func configureView() {
         backgroundColor = Colors.backgroundColor
     }
 
     // MARK: UIView
 
     override func draw(_ rect: CGRect) {
-        let context = UIGraphicsGetCurrentContext()
+        guard let context = UIGraphicsGetCurrentContext() else {
+            return
+        }
 
         // Draw hash line at the left edge.
         Colors.textColor.setFill()
-        context?.fill(CGRect(x: 0.0, y: 0.0, width: 0.5, height: rect.height))
+        context.fill(CGRect(x: 0.0, y: 0.0, width: 0.5, height: rect.height))
 
         if let featureTimelineDay = featureTimelineDay {
             // Draw day text next to the hash line, on the bottom.
@@ -63,7 +65,7 @@ final class FeatureTimelineDayCell: UICollectionViewCell {
                 let yOffset = rect.height * (1.0 - CGFloat(animatingFeature.feature.magnitude / AnimatingFeature.magnitudeMax))
                 let dotFrame = dotRect.offsetBy(dx: xOffset, dy: yOffset)
                 
-                context?.fillEllipse(in: dotFrame)
+                context.fillEllipse(in: dotFrame)
             }
         }
     }
