@@ -19,7 +19,7 @@ final class APIEndpoints {
         let halfSpanLongitude = region.span.longitudeDelta / 2.0
 
         let url = self.url(
-            path:"http://ehp2-earthquake.wr.usgs.gov/fdsnws/event/1/query",
+            path:"https://earthquake.usgs.gov/fdsnws/event/1/query",
             parameters: ["format": "geojson",
                 "jsonerror": "true",
                 "eventtype": "earthquake",
